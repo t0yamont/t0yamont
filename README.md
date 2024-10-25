@@ -2,7 +2,8 @@
 <h3 align="center">CompSci and Busines Management Under Grad student @ University of Surrey</h3>
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=t0yamont&label=Profile%20views&color=0e75b6&style=flat" alt="t0yamont" /> </p>
-
+- 📚 I'm currently learning **Django**
+- ⚙️ I’m currently working on **Lung Cancer ML Prediction Model**
 - How to reach me: **fgmontilla@outlook.com**
 
 <h3 align="left">Connect with me:</h3>
