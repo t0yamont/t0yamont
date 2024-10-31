@@ -5,7 +5,7 @@
 
 - 📚 I'm currently learning **Django**
 
-- ⚙️ I’m currently working on **Lung Cancer Prediction Web App**
+- ⚙️ I’m currently working on **Personal Portfolio**
 
 - How to reach me: **fgmontilla@outlook.com**
 
