@@ -55,6 +55,7 @@ export interface ProductItem {
   carbs: number;
   sodium: number;
   fluid: number;
+  caffeineMg?: number;
   note?: string;
   isCaffeine?: boolean;
 }
@@ -75,6 +76,15 @@ export interface NutritionPlan {
     avgFluidPerHour: number;
     avgSodiumPerHour: number;
   };
+  insights: {
+    estimatedSweatRateMlH: number;
+    recommendedFluidMlH: number;
+    plannedCaffeineMg: number;
+    plannedCaffeineMgPerKg: number;
+    caffeineFlag: 'low' | 'ok' | 'high' | null;
+    needsMixedCarb: boolean;
+    mixedCarbNotice: string | null;
+  };
 }
 
 export interface Product {
@@ -83,6 +93,8 @@ export interface Product {
   carbsG: number;
   sodiumMg: number;
   fluidMl: number;
+  caffeineMg: number;
+  mixedCarb: boolean;
   type: 'gel' | 'chew' | 'drink' | 'bar' | 'capsule';
   canUseOnSwim: boolean;
   canUseOnRun: boolean;
