@@ -1,0 +1,94 @@
+import { useState } from 'react';
+import { AnimatePresence } from 'framer-motion';
+import StepTransition from './StepTransition';
+import Step01_SportType from './steps/Step01_SportType';
+import Step02_RaceType from './steps/Step02_RaceType';
+import Step03_RaceDetails from './steps/Step03_RaceDetails';
+import Step04_Intensity from './steps/Step04_Intensity';
+import Step05_Conditions from './steps/Step05_Conditions';
+import Step06_SweatRate from './steps/Step06_SweatRate';
+import Step07_Saltiness from './steps/Step07_Saltiness';
+import Step08_GutTolerance from './steps/Step08_GutTolerance';
+import Step09_AthleteProfile from './steps/Step09_AthleteProfile';
+import Step10_BrandSelector from './steps/Step10_BrandSelector';
+import type { WizardState } from '../types';
+
+const STEP_LABELS = [
+  'Sport', 'Distance', 'Splits', 'Intensity', 'Conditions',
+  'Sweat', 'Sodium', 'Gut', 'Profile', 'Fuel Brand',
+];
+
+interface Props {
+  state: WizardState;
+  onChange: (partial: Partial<WizardState>) => void;
+  onComplete: () => void;
+}
+
+export default function WizardShell({ state, onChange, onComplete }: Props) {
+  const [step, setStep] = useState(0);
+  const [direction, setDirection] = useState<'forward' | 'back'>('forward');
+
+  const totalSteps = STEP_LABELS.length;
+  const progress = ((step + 1) / totalSteps) * 100;
+
+  const next = () => {
+    if (step < totalSteps - 1) {
+      setDirection('forward');
+      setStep(s => s + 1);
+    } else {
+      onComplete();
+    }
+  };
+
+  const back = () => {
+    if (step > 0) {
+      setDirection('back');
+      setStep(s => s - 1);
+    }
+  };
+
+  const stepProps = { state, onChange, onNext: next, onBack: back };
+
+  const stepComponents = [
+    <Step01_SportType {...stepProps} />,
+    <Step02_RaceType {...stepProps} />,
+    <Step03_RaceDetails {...stepProps} />,
+    <Step04_Intensity {...stepProps} />,
+    <Step05_Conditions {...stepProps} />,
+    <Step06_SweatRate {...stepProps} />,
+    <Step07_Saltiness {...stepProps} />,
+    <Step08_GutTolerance {...stepProps} />,
+    <Step09_AthleteProfile {...stepProps} />,
+    <Step10_BrandSelector {...stepProps} />,
+  ];
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {/* Progress bar */}
+      <div className="fixed top-0 left-0 right-0 z-30 h-0.5 bg-white/5">
+        <div
+          className="h-full bg-cyan-400 transition-all duration-500"
+          style={{ width: `${progress}%`, boxShadow: '0 0 8px #00d4ff' }}
+        />
+      </div>
+
+      {/* Step counter */}
+      <div className="fixed top-4 right-4 z-30">
+        <span className="text-slate-500 text-xs font-mono">{step + 1}/{totalSteps}</span>
+      </div>
+
+      {/* Step name */}
+      <div className="fixed top-4 left-4 z-30">
+        <span className="text-slate-500 text-xs uppercase tracking-widest">{STEP_LABELS[step]}</span>
+      </div>
+
+      <div className="flex-1 overflow-hidden pt-12">
+        <AnimatePresence mode="wait" custom={direction}>
+          <StepTransition key={step} direction={direction} stepKey={step}>
+            {stepComponents[step]}
+          </StepTransition>
+        </AnimatePresence>
+      </div>
+    </div>
+  );
+}
