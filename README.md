@@ -3,9 +3,9 @@
 
 <p align="left"> <img src="https://komarev.com/ghpvc/?username=t0yamont&label=Profile%20views&color=0e75b6&style=flat" alt="t0yamont" /> </p>
 
-- 📚 I'm currently learning **Django**
+- 📚 I'm currently learning **N/A**
 
-- ⚙️ I’m currently working on **Personal Portfolio**
+- ⚙️ I’m currently working on **Triathlon Fueling Plan App**
 
 - How to reach me: **fgmontilla@outlook.com**
 
