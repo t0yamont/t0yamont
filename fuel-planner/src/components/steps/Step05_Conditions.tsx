@@ -35,7 +35,7 @@ export default function Step05_Conditions({ state, onChange, onNext, onBack }: P
   const [searching, setSearching] = useState(false);
   const [fetchingWeather, setFetchingWeather] = useState(false);
   const [weatherInfo, setWeatherInfo] = useState('');
-  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   useEffect(() => {
     clearTimeout(debounceRef.current);

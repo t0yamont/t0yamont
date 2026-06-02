@@ -66,7 +66,7 @@ function MetricCard({ label, value, unit, color, min, max, note, subNote }: Metr
 }
 
 export default function NumbersSummary({ plan, state }: Props) {
-  const { avgCarbsPerHour, avgFluidPerHour, avgSodiumPerHour } = plan.totals;
+  const { avgCarbsPerHour, avgSodiumPerHour } = plan.totals;
   const { estimatedSweatRateMlH, recommendedFluidMlH,
           plannedCaffeineMg, plannedCaffeineMgPerKg,
           caffeineFlag, needsMixedCarb, mixedCarbNotice } = plan.insights;

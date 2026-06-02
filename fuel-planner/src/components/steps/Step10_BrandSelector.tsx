@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check, Zap } from 'lucide-react';
 import type { WizardState, FuelBrand, FuelKit } from '../../types';
-import { BRAND_INFO, PRODUCTS, getAllProductsFlat, kitFromBrand } from '../../data/brands';
+import { BRAND_INFO, getAllProductsFlat, kitFromBrand } from '../../data/brands';
 
 interface Props {
   state: WizardState;

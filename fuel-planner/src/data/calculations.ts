@@ -301,20 +301,17 @@ function buildTimeline(
   kit: ResolvedKit,
   gut: string,
   totalRaceMins: number,
-  isTri: boolean,
+  _isTri: boolean,
   _legs: string[],
-  preferMixed: boolean,
+  _preferMixed: boolean,
 ): { items: ProductItem[]; caffeineMg: number } {
   const timeline: ProductItem[] = [];
   const minGelGap = gut === 'sensitive' ? 30 : 20;
 
-  // Prefer mixed-carb primary gel if carb target is high and one is available
   const primaryGel = kit.primaryGel;
   const cafGel     = kit.cafGel;
   const drink      = kit.drink;
-  // Use solid for bike if available, fall back to primaryGel
-  const bikeBar    = kit.solid ?? primaryGel;
-  // Run fuel: prefer gel/chew over bar
+  // Run fuel: prefer gel/chew that can be used running; fall back to primary gel
   const runGel     = (kit.solid?.canUseOnRun ? kit.solid : null) ?? primaryGel;
 
   let elapsed          = 0;
