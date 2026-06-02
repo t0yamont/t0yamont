@@ -6,7 +6,8 @@ export type Saltiness = 'low' | 'moderate' | 'high' | 'very_high';
 export type GutTolerance = 'iron' | 'normal' | 'sensitive';
 export type CrampFrequency = 'never' | 'rarely' | 'sometimes' | 'often';
 export type Sex = 'male' | 'female' | 'prefer_not';
-export type FuelBrand = 'maurten' | 'sis' | 'high5' | 'tailwind' | 'veloforte' | 'generic';
+export type FuelBrand = 'maurten' | 'sis' | 'high5' | 'tailwind' | 'veloforte' | 'precision' | 'custom' | 'generic';
+export type ProductType = 'gel' | 'chew' | 'drink' | 'bar' | 'capsule';
 
 export interface FuelKit {
   primaryGelId: string;       // required — main race gel
@@ -21,10 +22,14 @@ export interface SplitTimes {
   runMins: number;
 }
 
+// Bottle sizes offered for pack-list math (Change 1)
+export type BottleSizeMl = 500 | 600 | 750;
+
 export interface AthleteProfile {
   weightKg: number;
   age: number;
   sex: Sex;
+  bottleSizeMl: BottleSizeMl;   // used only for pack-list bottle derivation
 }
 
 export interface WizardState {
@@ -41,6 +46,8 @@ export interface WizardState {
   athlete: AthleteProfile;
   fuelKit: FuelKit;
   brand: FuelBrand | null;    // metadata for quick-fill display
+  customProducts: Product[];  // user-defined product library (Change 2)
+  highCarbAdvanced: boolean;  // opt-in 120–150 g/h ceiling (Change 4)
   raceDate: string | null;
   location: { name: string; lat: number; lon: number } | null;
   weatherAuto: boolean;
@@ -66,6 +73,33 @@ export interface ProductItem {
   caffeineMg?: number;
   note?: string;
   isCaffeine?: boolean;
+  // Pack-list metadata (Change 1) — lets the pack list reconcile with the timeline
+  productType?: ProductType;
+  servingVolumeMl?: number;   // for drinks: volume one serving is mixed into
+  servingsPerContainer?: number;
+}
+
+// ─── Pack list (Change 1) ───────────────────────────────────────────────────
+export interface PackItem {
+  product: string;
+  productType: ProductType;
+  count: number;              // total servings / units across the grouping
+  carbs: number;              // total carbs from this product
+  sodium: number;             // total sodium from this product
+  fluid: number;              // total fluid volume from this product
+  caffeineMg: number;
+  isCaffeine: boolean;
+  bottles?: number;           // derived for drink products
+  servingVolumeMl?: number;
+  servingsPerContainer?: number;
+}
+
+export interface PackList {
+  total: PackItem[];
+  byLeg: Array<{ leg: string; items: PackItem[] }>;
+  totals: { carbsG: number; sodiumMg: number; fluidMl: number; caffeineMg: number };
+  spareGels: { low: number; high: number };   // +1 contingency suggestion
+  bottleSizeMl: number;
 }
 
 export interface NutritionPlan {
@@ -92,6 +126,8 @@ export interface NutritionPlan {
     caffeineFlag: 'low' | 'ok' | 'high' | null;
     needsMixedCarb: boolean;
     mixedCarbNotice: string | null;
+    carbCeiling: number;          // the g/h cap applied for this plan (Change 4)
+    highCarbActive: boolean;      // advanced high-carb band in effect
   };
 }
 
@@ -103,10 +139,12 @@ export interface Product {
   fluidMl: number;
   caffeineMg: number;
   mixedCarb: boolean;
-  type: 'gel' | 'chew' | 'drink' | 'bar' | 'capsule';
+  type: ProductType;
   canUseOnSwim: boolean;
   canUseOnRun: boolean;
   caffeinated: boolean;
+  servingsPerContainer?: number;  // optional — for pack-list shopping math
+  isCustom?: boolean;             // user-defined library product (Change 2)
 }
 
 export interface SavedPlan {

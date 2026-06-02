@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart3, Layers, Clock, Sunrise, Package, AlertTriangle, Info } from 'lucide-react';
+import { BarChart3, Layers, Clock, Sunrise, Package, PackageCheck, AlertTriangle, Info } from 'lucide-react';
 import type { WizardState, NutritionPlan } from '../../types';
 import NumbersSummary from './NumbersSummary';
 import SegmentBreakdown from './SegmentBreakdown';
 import RaceTimeline from './RaceTimeline';
 import PreRacePlan from './PreRacePlan';
 import ProductSchedule from './ProductSchedule';
+import PackList from './PackList';
 import SavePlanButton from '../../plans/SavePlanButton';
 import { isSupabaseConfigured } from '../../lib/supabase';
 
@@ -22,6 +23,7 @@ const TABS = [
   { id: 'timeline', label: 'Timeline', icon: Clock },
   { id: 'prerace', label: 'Pre-Race', icon: Sunrise },
   { id: 'schedule', label: 'Schedule', icon: Package },
+  { id: 'packlist', label: 'Pack list', icon: PackageCheck },
 ];
 
 export default function ResultsShell({ state, plan, onReset }: Props) {
@@ -120,6 +122,7 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
             {activeTab === 'timeline' && <RaceTimeline plan={plan} />}
             {activeTab === 'prerace' && <PreRacePlan plan={plan} athlete={state.athlete} />}
             {activeTab === 'schedule' && <ProductSchedule plan={plan} state={state} />}
+            {activeTab === 'packlist' && <PackList plan={plan} state={state} />}
           </motion.div>
         </AnimatePresence>
       </div>

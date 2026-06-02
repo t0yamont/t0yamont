@@ -24,6 +24,15 @@ const CAFFEINE_MG_PER_KG_RANGE = [3, 6] as const;
 const CAFFEINE_MAX_MG = 400;
 const MIXED_CARB_THRESHOLD = 60;
 
+// ── Carb ceilings (Change 4) ──────────────────────────────────────────────────
+// Protective by default; raised when multi-transportable (mixedCarb) fuel is used,
+// and again only when the athlete opts into the advanced high-carb band.
+const CARB_CEILING = { default: 90, mixed: 120, advanced: 150 } as const;
+const ADVANCED_CARB_REQUIRES = { gut: ['normal', 'iron'], mixedCarb: true } as const;
+// When advanced high-carb is enabled & eligible, push the target into the 120–150 band.
+const ADVANCED_CARB_MULT = 1.5;
+const HIGH_CARB_PRODUCT_THRESHOLD = 60;   // a single serving this large = "high-carb" product
+
 const SWEAT_RATE_ML: Record<string, number> = {
   light: 500, moderate: 750, heavy: 1000, very_heavy: 1200,
 };
@@ -45,17 +54,43 @@ function sodiumPerLitre(saltiness: string): number {
   return 1500;
 }
 
-function computeCarbTarget(intens: string, sport: string, totalHours: number, gut: string): number {
+/** Is the athlete eligible for the advanced 120–150 g/h band? (Change 4A) */
+export function advancedCarbEligible(gut: string, hasMixedCarb: boolean, highCarbAdvanced: boolean): boolean {
+  return highCarbAdvanced
+    && ADVANCED_CARB_REQUIRES.mixedCarb && hasMixedCarb
+    && (ADVANCED_CARB_REQUIRES.gut as readonly string[]).includes(gut);
+}
+
+/** The g/h ceiling that applies given the selected products and opt-in state. */
+export function carbCeilingFor(gut: string, hasMixedCarb: boolean, highCarbAdvanced: boolean): number {
+  if (advancedCarbEligible(gut, hasMixedCarb, highCarbAdvanced)) return CARB_CEILING.advanced;
+  if (hasMixedCarb) return CARB_CEILING.mixed;
+  return CARB_CEILING.default;
+}
+
+function computeCarbTarget(
+  intens: string, sport: string, totalHours: number, gut: string,
+  hasMixedCarb: boolean, highCarbAdvanced: boolean,
+): number {
   const band = CARB_BANDS[intens] ?? CARB_BANDS.moderate;
   const dur  = Math.min(1, totalHours / 6) * 0.5;
   const sp   = SPORT_CARB_BIAS[sport] ?? 0;
   const ic   = intens === 'finish' ? -0.1 : intens === 'limit' ? 0.1 : 0;
   const pos  = Math.min(1, Math.max(0, dur + sp + ic));
   const raw  = band.low + (band.high - band.low) * pos;
-  const mult = raw * (INTENSITY_CARB_MULT[intens] ?? 1.0);
-  if (gut === 'sensitive') return mult * (1 + GUT_CARB.sensitive);
-  if (gut === 'iron')      return Math.min(mult, band.high * GUT_CARB.iron_ceiling);
-  return mult;
+  let mult   = raw * (INTENSITY_CARB_MULT[intens] ?? 1.0);
+
+  if (gut === 'sensitive')   mult = mult * (1 + GUT_CARB.sensitive);
+  else if (gut === 'iron')   mult = Math.min(mult, band.high * GUT_CARB.iron_ceiling);
+
+  const ceiling = carbCeilingFor(gut, hasMixedCarb, highCarbAdvanced);
+
+  // Advanced opt-in pushes the target up into the 120–150 band (still capped at the ceiling).
+  if (advancedCarbEligible(gut, hasMixedCarb, highCarbAdvanced)) {
+    mult = Math.max(CARB_CEILING.mixed, mult * ADVANCED_CARB_MULT);
+  }
+
+  return Math.min(mult, ceiling);
 }
 
 function computeFluid(sweat: string, temp: number, humidity: string, weightKg: number) {
@@ -71,8 +106,8 @@ function computeFluid(sweat: string, temp: number, humidity: string, weightKg: n
   };
 }
 
-/** Resolve FuelKit product IDs to actual Product objects. Falls back to generic. */
-function resolveKit(kit: FuelKit): {
+/** Resolve FuelKit product IDs to actual Product objects (brand + custom). Falls back to generic. */
+function resolveKit(kit: FuelKit, custom: Product[]): {
   primaryGel: Product;
   cafGel: Product | null;
   drink: Product | null;
@@ -80,10 +115,10 @@ function resolveKit(kit: FuelKit): {
 } {
   const fallback = PRODUCTS.generic[0];
   return {
-    primaryGel: getProductById(kit.primaryGelId) ?? fallback,
-    cafGel:     kit.cafGelId  ? getProductById(kit.cafGelId)  : null,
-    drink:      kit.drinkId   ? getProductById(kit.drinkId)   : null,
-    solid:      kit.solidId   ? getProductById(kit.solidId)   : null,
+    primaryGel: getProductById(kit.primaryGelId, custom) ?? fallback,
+    cafGel:     kit.cafGelId  ? getProductById(kit.cafGelId, custom)  : null,
+    drink:      kit.drinkId   ? getProductById(kit.drinkId, custom)   : null,
+    solid:      kit.solidId   ? getProductById(kit.solidId, custom)   : null,
   };
 }
 
@@ -91,7 +126,10 @@ function resolveKit(kit: FuelKit): {
 
 export function computePlan(state: WizardState): NutritionPlan {
   const { sport, splitTimes, intensity, tempCelsius, humidity,
-          sweatRate, saltiness, crampFrequency, gutTolerance, athlete, fuelKit } = state;
+          sweatRate, saltiness, crampFrequency, gutTolerance, athlete, fuelKit,
+          customProducts, highCarbAdvanced } = state;
+  const custom = customProducts ?? [];
+  const advancedOptIn = highCarbAdvanced ?? false;
 
   const intens = intensity       ?? 'moderate';
   const gut    = gutTolerance    ?? 'normal';
@@ -112,10 +150,18 @@ export function computePlan(state: WizardState): NutritionPlan {
 
   // ── Resolve kit products ──────────────────────────────────────────────────
   const kit = fuelKit ?? { primaryGelId: 'generic_gel', cafGelId: 'generic_caf_gel', drinkId: null, solidId: null };
-  const resolved = resolveKit(kit);
+  const resolved = resolveKit(kit, custom);
+
+  // Does the selected kit include a multi-transportable (glucose:fructose) product?
+  const hasMixedCarb = Boolean(
+    resolved.primaryGel.mixedCarb || resolved.drink?.mixedCarb ||
+    resolved.solid?.mixedCarb || resolved.cafGel?.mixedCarb,
+  );
+  const carbCeiling   = carbCeilingFor(gut, hasMixedCarb, advancedOptIn);
+  const highCarbActive = advancedCarbEligible(gut, hasMixedCarb, advancedOptIn);
 
   // ── Carb targets ──────────────────────────────────────────────────────────
-  const carbTarget = computeCarbTarget(intens, sp, totalHours, gut);
+  const carbTarget = computeCarbTarget(intens, sp, totalHours, gut, hasMixedCarb, advancedOptIn);
   const bikeCarb   = Math.round(carbTarget);
   const runCarbRaw = isTri ? carbTarget * (gut === 'sensitive' ? 0.90 : 0.95) : carbTarget;
   const runCarb    = Math.round(runCarbRaw);
@@ -135,8 +181,7 @@ export function computePlan(state: WizardState): NutritionPlan {
 
   // ── Mixed-carb flag ───────────────────────────────────────────────────────
   const needsMixedCarb = bikeCarb > MIXED_CARB_THRESHOLD || runCarb > MIXED_CARB_THRESHOLD;
-  const hasMixedInKit  = resolved.primaryGel.mixedCarb || resolved.drink?.mixedCarb;
-  const mixedCarbNotice = needsMixedCarb && !hasMixedInKit
+  const mixedCarbNotice = needsMixedCarb && !hasMixedCarb
     ? `Your carb target (${Math.max(bikeCarb, runCarb)} g/h) exceeds 60 g/h. Single-source glucose plateaus at ~60 g/h oxidation — use a glucose:fructose product to absorb more.`
     : null;
 
@@ -240,24 +285,46 @@ export function computePlan(state: WizardState): NutritionPlan {
   }
 
   // ── Pre-race plan ─────────────────────────────────────────────────────────
+  // Carb-loading guidance is duration-led (Change 4B): glycogen need scales with
+  // event length, not a blanket high number. The old 3-day depletion-then-load
+  // protocol is outdated — 24–36h is enough for most amateurs.
   const gelName      = resolved.primaryGel.name;
   const gelCarbs     = resolved.primaryGel.carbsG;
-  const carbLoadRange = totalHours < 3 ? '6–8 g/kg' : '8–10 g/kg';
-  const carbLoadLow   = Math.round(athlete.weightKg * (totalHours < 3 ? 6 : 8));
-  const carbLoadHigh  = Math.round(athlete.weightKg * (totalHours < 3 ? 8 : 10));
-  const morningCarbs  = Math.round(athlete.weightKg * 2);
+
+  // < 90 min: no load. 90 min–3 h: moderate top-up 6–8 g/kg. 3 h+: classic 8–10 g/kg.
+  const noLoadNeeded   = totalHours < 1.5;
+  const loadLowGkg     = totalHours >= 3 ? 8 : 6;
+  const loadHighGkg    = totalHours >= 3 ? 10 : 8;
+  const carbLoadLow    = Math.round(athlete.weightKg * loadLowGkg);
+  const carbLoadHigh   = Math.round(athlete.weightKg * loadHighGkg);
+  const morningCarbs   = Math.round(athlete.weightKg * 2);
+
+  const nightBefore = noLoadNeeded
+    ? [
+        'Event under 90 min: no carb-loading needed — a normal, carb-inclusive day is enough',
+        'Eat a familiar, carb-rich dinner; no need to over-eat',
+        'Total carbohydrate over the day matters more than timing tricks',
+        'Prioritise familiar, low-fibre carbs — don\'t trial new foods the night before',
+        'Drink to thirst with an electrolyte; lay out kit and get 8–9h sleep',
+      ]
+    : totalHours < 3
+    ? [
+        `Moderate top-up the day before: ~${loadLowGkg}–${loadHighGkg} g/kg (${carbLoadLow}–${carbLoadHigh} g for you)`,
+        'One day of raised carbs is plenty for a 90 min–3 h event',
+        'Total carbohydrate over the day matters more than timing tricks',
+        'Prioritise familiar, low-fibre carbs — don\'t trial new foods the night before',
+        'Drink 500ml electrolyte with dinner; get 8–9h sleep',
+      ]
+    : [
+        `Classic load: ${loadLowGkg}–${loadHighGkg} g/kg (${carbLoadLow}–${carbLoadHigh} g for you) for 24–36 h before`,
+        'One day is usually enough — the older 3-day depletion-then-load protocol is outdated and not required',
+        'Total carbohydrate over the day matters more than timing tricks',
+        'Prioritise familiar, low-fibre carbs — don\'t trial new foods the night before',
+        'Drink 500ml electrolyte with dinner; lay out kit and get 8–9h sleep',
+      ];
 
   const preRace = {
-    nightBefore: [
-      `Carb-load all day: target ${carbLoadRange} body weight (${carbLoadLow}–${carbLoadHigh} g for you)`,
-      totalHours >= 3
-        ? 'Eat a high-carb dinner — pasta, rice or potatoes with lean protein'
-        : 'A good carb-rich evening meal is enough — no need to force eat',
-      'Many athletes tolerate the lower end of the range better — don\'t force the top',
-      'Drink 500ml electrolyte with dinner',
-      'Avoid high-fibre, high-fat, or unfamiliar foods',
-      'Lay out race kit and get 8–9h sleep',
-    ],
+    nightBefore,
     raceMorning: [
       `Eat ${morningCarbs}g carbs (1–3 g/kg) 2–3h before start — white rice, toast with jam, banana`,
       'Drink 500ml water or electrolyte with breakfast',
@@ -283,6 +350,7 @@ export function computePlan(state: WizardState): NutritionPlan {
       estimatedSweatRateMlH, recommendedFluidMlH,
       plannedCaffeineMg, plannedCaffeineMgPerKg, caffeineFlag,
       needsMixedCarb, mixedCarbNotice,
+      carbCeiling, highCarbActive,
     },
   };
 }
@@ -338,6 +406,7 @@ function buildTimeline(
         time: fmt(elapsed), segment: 'T1', product: gel.name,
         quantity: 1, carbs: gel.carbsG, sodium: gel.sodiumMg, fluid: 150,
         caffeineMg: cMg, isCaffeine: useCaf,
+        productType: gel.type, servingsPerContainer: gel.servingsPerContainer,
         note: useCaf ? `Caffeine hit (${cMg}mg) — primes the ride` : 'Quick gel + 150ml water',
       });
       lastFuelTime = elapsed;
@@ -350,7 +419,9 @@ function buildTimeline(
       timeline.push({
         time: fmt(elapsed), segment: 'T2', product: primaryGel.name,
         quantity: 1, carbs: primaryGel.carbsG, sodium: primaryGel.sodiumMg,
-        fluid: 100, caffeineMg: cMg, note: 'Fuel up before the run',
+        fluid: 100, caffeineMg: cMg,
+        productType: primaryGel.type, servingsPerContainer: primaryGel.servingsPerContainer,
+        note: 'Fuel up before the run',
       });
       lastFuelTime = elapsed;
       elapsed += seg.durationMins;
@@ -371,7 +442,10 @@ function buildTimeline(
         timeline.push({
           time: fmt(next), segment: segLabel, product: drink.name,
           quantity: 1, carbs: drink.carbsG, sodium: drink.sodiumMg,
-          fluid: drink.fluidMl, caffeineMg: 0, note: 'Hydration bottle',
+          fluid: drink.fluidMl, caffeineMg: 0,
+          productType: 'drink', servingVolumeMl: drink.fluidMl,
+          servingsPerContainer: drink.servingsPerContainer,
+          note: 'Hydration bottle',
         });
         next += bottleInterval;
       }
@@ -404,8 +478,12 @@ function buildTimeline(
           quantity: 1, carbs: chosen.carbsG, sodium: chosen.sodiumMg,
           fluid: seg.segment === 'run' ? 150 : 0,
           caffeineMg: cMg, isCaffeine: chosen.caffeinated,
+          productType: chosen.type, servingVolumeMl: chosen.type === 'drink' ? chosen.fluidMl : undefined,
+          servingsPerContainer: chosen.servingsPerContainer,
           note: chosen.caffeinated
             ? `Caffeine boost (${cMg}mg) — final push`
+            : chosen.carbsG >= HIGH_CARB_PRODUCT_THRESHOLD
+            ? `High-carb serving (${chosen.carbsG}g) — fewer, larger doses`
             : seg.segment === 'run' ? 'With water from aid station' : undefined,
         });
         lastFuelTime = nextGel;

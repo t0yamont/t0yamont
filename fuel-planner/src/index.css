@@ -78,6 +78,20 @@ input[type="range"]::-moz-range-thumb {
   .no-print {
     display: none !important;
   }
+  /* Force a legible palette: dark text, visible borders, no glows. */
+  #root * {
+    color: #111 !important;
+    box-shadow: none !important;
+  }
+  #root [class*="border"] {
+    border-color: #cbd5e1 !important;
+  }
+  /* Keep checkboxes as real boxes so the pack list prints as a checklist. */
+  input[type="checkbox"] {
+    -webkit-appearance: checkbox !important;
+    appearance: checkbox !important;
+    opacity: 1 !important;
+  }
 }
 
 ::-webkit-scrollbar {
