@@ -15,16 +15,17 @@ import type { WizardState } from '../types';
 
 const STEP_LABELS = [
   'Sport', 'Distance', 'Splits', 'Intensity', 'Conditions',
-  'Sweat', 'Sodium', 'Gut', 'Profile', 'Fuel Brand',
+  'Sweat', 'Sodium', 'Gut', 'Profile', 'Fuel Kit',
 ];
 
 interface Props {
   state: WizardState;
   onChange: (partial: Partial<WizardState>) => void;
   onComplete: () => void;
+  onHome: () => void;
 }
 
-export default function WizardShell({ state, onChange, onComplete }: Props) {
+export default function WizardShell({ state, onChange, onComplete, onHome }: Props) {
   const [step, setStep] = useState(0);
   const [direction, setDirection] = useState<'forward' | 'back'>('forward');
 
@@ -77,8 +78,15 @@ export default function WizardShell({ state, onChange, onComplete }: Props) {
         <span className="text-slate-500 text-xs font-mono">{step + 1}/{totalSteps}</span>
       </div>
 
-      {/* Step name */}
-      <div className="fixed top-4 left-4 z-30">
+      {/* Home + step name */}
+      <div className="fixed top-2 left-4 z-30 flex items-center gap-2">
+        <button
+          onClick={onHome}
+          className="text-slate-600 hover:text-slate-400 text-xs transition-colors"
+        >
+          ← Home
+        </button>
+        <span className="text-slate-700 text-xs">·</span>
         <span className="text-slate-500 text-xs uppercase tracking-widest">{STEP_LABELS[step]}</span>
       </div>
 

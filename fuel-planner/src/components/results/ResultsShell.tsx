@@ -119,7 +119,7 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
             {activeTab === 'segments' && <SegmentBreakdown plan={plan} />}
             {activeTab === 'timeline' && <RaceTimeline plan={plan} />}
             {activeTab === 'prerace' && <PreRacePlan plan={plan} athlete={state.athlete} />}
-            {activeTab === 'schedule' && <ProductSchedule plan={plan} brand={state.brand ?? 'generic'} />}
+            {activeTab === 'schedule' && <ProductSchedule plan={plan} state={state} />}
           </motion.div>
         </AnimatePresence>
       </div>

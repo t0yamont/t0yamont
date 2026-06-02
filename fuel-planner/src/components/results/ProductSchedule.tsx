@@ -1,26 +1,30 @@
 import { Printer } from 'lucide-react';
-import type { NutritionPlan, FuelBrand } from '../../types';
+import type { NutritionPlan, WizardState } from '../../types';
 import { BRAND_INFO } from '../../data/brands';
 
 interface Props {
   plan: NutritionPlan;
-  brand: FuelBrand;
+  state: WizardState;
 }
 
-export default function ProductSchedule({ plan, brand }: Props) {
+export default function ProductSchedule({ plan, state }: Props) {
   const { timeline } = plan;
 
-  const totalCarbs = timeline.reduce((s, i) => s + i.carbs * i.quantity, 0);
+  const totalCarbs  = timeline.reduce((s, i) => s + i.carbs  * i.quantity, 0);
   const totalSodium = timeline.reduce((s, i) => s + i.sodium * i.quantity, 0);
-  const totalFluid = timeline.reduce((s, i) => s + i.fluid * i.quantity, 0);
+  const totalFluid  = timeline.reduce((s, i) => s + i.fluid  * i.quantity, 0);
+
+  const kitLabel = state.brand && state.brand !== 'generic'
+    ? BRAND_INFO[state.brand].label
+    : 'Custom Kit';
 
   return (
     <div className="px-4 py-5 space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-slate-400 text-xs uppercase tracking-widest">Brand</p>
+          <p className="text-slate-400 text-xs uppercase tracking-widest">Fuel Kit</p>
           <p className="text-white font-bold" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.1rem' }}>
-            {BRAND_INFO[brand].label}
+            {kitLabel}
           </p>
         </div>
         <button

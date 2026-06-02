@@ -8,6 +8,13 @@ export type CrampFrequency = 'never' | 'rarely' | 'sometimes' | 'often';
 export type Sex = 'male' | 'female' | 'prefer_not';
 export type FuelBrand = 'maurten' | 'sis' | 'high5' | 'tailwind' | 'veloforte' | 'generic';
 
+export interface FuelKit {
+  primaryGelId: string;       // required — main race gel
+  cafGelId: string | null;    // optional — any caffeinated product from any brand
+  drinkId: string | null;     // optional — hydration/carb drink
+  solidId: string | null;     // optional — bar or chew
+}
+
 export interface SplitTimes {
   swimMins: number;
   bikeMins: number;
@@ -32,7 +39,8 @@ export interface WizardState {
   crampFrequency: CrampFrequency | null;
   gutTolerance: GutTolerance | null;
   athlete: AthleteProfile;
-  brand: FuelBrand | null;
+  fuelKit: FuelKit;
+  brand: FuelBrand | null;    // metadata for quick-fill display
   raceDate: string | null;
   location: { name: string; lat: number; lon: number } | null;
   weatherAuto: boolean;
@@ -55,6 +63,7 @@ export interface ProductItem {
   carbs: number;
   sodium: number;
   fluid: number;
+  caffeineMg?: number;
   note?: string;
   isCaffeine?: boolean;
 }
@@ -75,6 +84,15 @@ export interface NutritionPlan {
     avgFluidPerHour: number;
     avgSodiumPerHour: number;
   };
+  insights: {
+    estimatedSweatRateMlH: number;
+    recommendedFluidMlH: number;
+    plannedCaffeineMg: number;
+    plannedCaffeineMgPerKg: number;
+    caffeineFlag: 'low' | 'ok' | 'high' | null;
+    needsMixedCarb: boolean;
+    mixedCarbNotice: string | null;
+  };
 }
 
 export interface Product {
@@ -83,6 +101,8 @@ export interface Product {
   carbsG: number;
   sodiumMg: number;
   fluidMl: number;
+  caffeineMg: number;
+  mixedCarb: boolean;
   type: 'gel' | 'chew' | 'drink' | 'bar' | 'capsule';
   canUseOnSwim: boolean;
   canUseOnRun: boolean;
