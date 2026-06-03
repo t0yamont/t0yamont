@@ -6,14 +6,21 @@ const rawUrl = import.meta.env.VITE_SUPABASE_URL ?? '';
 const supabaseUrl = rawUrl.replace(/\/+$/, '');
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY ?? '';
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Check first — createClient throws "supabaseUrl is required" when given empty strings,
+// which crashes this module at import time and prevents React from mounting.
+const configured = Boolean(supabaseUrl && supabaseAnonKey);
 
-export const isSupabaseConfigured = () => Boolean(supabaseUrl && supabaseAnonKey);
+export const isSupabaseConfigured = () => configured;
+
+// Only create the real client when credentials exist.
+// All callers (AuthProvider etc.) guard with isSupabaseConfigured() before using this.
+export const supabase = configured
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : ({} as ReturnType<typeof createClient>);
 
 /** Returns a human-readable diagnosis if the URL looks wrong. */
 export function supabaseUrlDiagnosis(): string | null {
   if (!rawUrl) return null;
-  // URL should look like https://<ref>.supabase.co with no path
   try {
     const u = new URL(supabaseUrl);
     if (u.pathname !== '/') {
