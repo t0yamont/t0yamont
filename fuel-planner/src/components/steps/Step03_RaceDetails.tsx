@@ -31,17 +31,10 @@ export default function Step03_RaceDetails({ state, onChange, onNext, onBack }: 
     onChange({ splitTimes: { ...state.splitTimes, [key]: val } });
   };
 
-  const sliders: Array<{
-    key: keyof typeof state.splitTimes;
-    label: string;
-    min: number;
-    max: number;
-    value: number;
-    show: boolean;
-  }> = [
-    { key: 'swimMins', label: 'Swim', min: ranges.swimMin, max: ranges.swimMax, value: swimMins, show: legs.includes('swim') },
-    { key: 'bikeMins', label: 'Bike', min: ranges.bikeMin, max: ranges.bikeMax, value: bikeMins, show: legs.includes('bike') },
-    { key: 'runMins', label: 'Run', min: ranges.runMin, max: ranges.runMax, value: runMins, show: legs.includes('run') },
+  const sliders = [
+    { key: 'swimMins' as const, label: 'Swim', min: ranges.swimMin, max: ranges.swimMax, value: swimMins, show: legs.includes('swim') },
+    { key: 'bikeMins' as const, label: 'Bike', min: ranges.bikeMin, max: ranges.bikeMax, value: bikeMins, show: legs.includes('bike') },
+    { key: 'runMins' as const, label: 'Run', min: ranges.runMin, max: ranges.runMax, value: runMins, show: legs.includes('run') },
   ].filter(s => s.show);
 
   const canProceed = sliders.every(s => s.value > 0);

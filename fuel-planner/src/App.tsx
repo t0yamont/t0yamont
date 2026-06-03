@@ -20,12 +20,19 @@ const DEFAULT_STATE: WizardState = {
   saltiness: null,
   crampFrequency: null,
   gutTolerance: null,
-  athlete: { weightKg: 70, age: 30, sex: 'prefer_not' },
+  athlete: { weightKg: 70, age: 30, sex: 'prefer_not', bottleSizeMl: 750 },
   fuelKit: { primaryGelId: 'generic_gel', cafGelId: null, drinkId: null, solidId: null },
   brand: null,
+  customProducts: [],
+  highCarbAdvanced: false,
   raceDate: null,
   location: null,
   weatherAuto: false,
+  // v4
+  selectedRace: null,
+  raceMode: 'generic',
+  gelDrinkSplit: 60,
+  planStyle: 'relaxed',
 };
 
 function AppInner() {

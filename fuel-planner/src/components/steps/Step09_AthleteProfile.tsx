@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import type { WizardState, Sex } from '../../types';
+import type { WizardState, Sex, BottleSizeMl } from '../../types';
 
 interface Props {
   state: WizardState;
@@ -15,10 +15,12 @@ const SEX_OPTIONS: Array<{ id: Sex; label: string }> = [
   { id: 'prefer_not', label: 'Prefer not to say' },
 ];
 
+const BOTTLE_OPTIONS: BottleSizeMl[] = [500, 600, 750];
+
 export default function Step09_AthleteProfile({ state, onChange, onNext, onBack }: Props) {
   const [unit, setUnit] = useState<'kg' | 'lbs'>('kg');
 
-  const { weightKg, age, sex } = state.athlete;
+  const { weightKg, age, sex, bottleSizeMl } = state.athlete;
 
   const setWeight = (val: number) => {
     const kg = unit === 'lbs' ? Math.round(val / 2.205) : val;
@@ -109,6 +111,29 @@ export default function Step09_AthleteProfile({ state, onChange, onNext, onBack 
                 }`}
               >
                 {opt.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Bottle size — used for the pack-list bottle count */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <label className="text-white font-semibold text-sm">Bottle size</label>
+            <span className="text-slate-500 text-xs">for your pack list</span>
+          </div>
+          <div className="grid grid-cols-3 gap-2">
+            {BOTTLE_OPTIONS.map(ml => (
+              <button
+                key={ml}
+                onClick={() => onChange({ athlete: { ...state.athlete, bottleSizeMl: ml } })}
+                className={`py-3 px-2 rounded-xl text-sm font-semibold transition-all ${
+                  bottleSizeMl === ml
+                    ? 'bg-cyan-500/20 border border-cyan-400 text-cyan-300'
+                    : 'bg-white/5 border border-white/10 text-slate-400 hover:border-white/20'
+                }`}
+              >
+                {ml}ml
               </button>
             ))}
           </div>

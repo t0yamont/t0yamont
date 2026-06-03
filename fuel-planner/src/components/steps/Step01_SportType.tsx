@@ -1,6 +1,5 @@
 import { motion } from 'framer-motion';
 import type { WizardState, Sport } from '../../types';
-import { SPORTS } from '../../data/sports';
 
 interface Props {
   state: WizardState;

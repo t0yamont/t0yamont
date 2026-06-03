@@ -20,3 +20,25 @@ create policy "users update own plans"
   on plans for update using (auth.uid() = user_id);
 create policy "users delete own plans"
   on plans for delete using (auth.uid() = user_id);
+
+-- Custom product library (Change 2) — user-defined fuel products
+create table custom_products (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  name text not null,
+  type text not null,
+  carbs numeric not null,
+  sodium numeric default 0,
+  fluid numeric default 0,
+  caffeine numeric default 0,
+  mixed_carb boolean default false,
+  servings_per_container numeric,
+  created_at timestamptz default now()
+);
+
+alter table custom_products enable row level security;
+
+create policy "own custom products"
+  on custom_products for all
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);

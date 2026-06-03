@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import type { User } from '@supabase/supabase-js';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { supabase, isSupabaseConfigured, supabaseUrlDiagnosis } from '../lib/supabase';
 
 interface AuthContextValue {
   user: User | null;
@@ -17,6 +17,16 @@ const AuthContext = createContext<AuthContextValue>({
   signUp: async () => ({ error: null }),
   signOut: async () => {},
 });
+
+function friendlyAuthError(msg: string): string {
+  if (msg.toLowerCase().includes('invalid path') || msg.toLowerCase().includes('invalid url')) {
+    const diag = supabaseUrlDiagnosis();
+    return diag
+      ? `Supabase config error — ${diag}`
+      : 'Supabase URL is misconfigured. VITE_SUPABASE_URL must be your project URL with no trailing slash or path (e.g. https://xxxx.supabase.co).';
+  }
+  return msg;
+}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -42,12 +52,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error?.message ?? null };
+    return { error: error ? friendlyAuthError(error.message) : null };
   };
 
   const signUp = async (email: string, password: string) => {
     const { error } = await supabase.auth.signUp({ email, password });
-    return { error: error?.message ?? null };
+    return { error: error ? friendlyAuthError(error.message) : null };
   };
 
   const signOut = async () => {

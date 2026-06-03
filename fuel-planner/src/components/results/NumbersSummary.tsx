@@ -66,10 +66,11 @@ function MetricCard({ label, value, unit, color, min, max, note, subNote }: Metr
 }
 
 export default function NumbersSummary({ plan, state }: Props) {
-  const { avgCarbsPerHour, avgFluidPerHour, avgSodiumPerHour } = plan.totals;
+  const { avgCarbsPerHour, avgSodiumPerHour } = plan.totals;
   const { estimatedSweatRateMlH, recommendedFluidMlH,
           plannedCaffeineMg, plannedCaffeineMgPerKg,
-          caffeineFlag, needsMixedCarb, mixedCarbNotice } = plan.insights;
+          caffeineFlag, needsMixedCarb, mixedCarbNotice,
+          carbCeiling, highCarbActive } = plan.insights;
 
   return (
     <div className="px-4 py-5 space-y-4">
@@ -96,11 +97,13 @@ export default function NumbersSummary({ plan, state }: Props) {
         unit="g/h"
         color="#00d4ff"
         min={30}
-        max={100}
+        max={Math.max(100, carbCeiling ?? 90)}
         note={
-          needsMixedCarb
-            ? `Above 60 g/h — ${state.brand && state.brand !== 'generic' ? 'mixed-carb products preferred in your schedule' : 'choose glucose:fructose products to maximise absorption'}.`
-            : 'Carb intake averaged across fuelling segments.'
+          highCarbActive
+            ? `Advanced high-carb band active — ceiling raised to ${carbCeiling} g/h. Build this up gradually in training.`
+            : needsMixedCarb
+            ? `Above 60 g/h — ${state.brand && state.brand !== 'generic' ? 'mixed-carb products preferred in your schedule' : 'choose glucose:fructose products to maximise absorption'} (ceiling ${carbCeiling ?? 90} g/h).`
+            : `Carb intake averaged across fuelling segments (ceiling ${carbCeiling ?? 90} g/h).`
         }
       />
 

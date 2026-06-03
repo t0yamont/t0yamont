@@ -3,9 +3,10 @@ import { AnimatePresence } from 'framer-motion';
 import StepTransition from './StepTransition';
 import Step01_SportType from './steps/Step01_SportType';
 import Step02_RaceType from './steps/Step02_RaceType';
-import Step03_RaceDetails from './steps/Step03_RaceDetails';
+import Step03_RaceSelector from './steps/Step03_RaceSelector';
 import Step04_Intensity from './steps/Step04_Intensity';
 import Step05_Conditions from './steps/Step05_Conditions';
+import Step03_RaceDetails from './steps/Step03_RaceDetails';
 import Step06_SweatRate from './steps/Step06_SweatRate';
 import Step07_Saltiness from './steps/Step07_Saltiness';
 import Step08_GutTolerance from './steps/Step08_GutTolerance';
@@ -13,8 +14,9 @@ import Step09_AthleteProfile from './steps/Step09_AthleteProfile';
 import Step10_BrandSelector from './steps/Step10_BrandSelector';
 import type { WizardState } from '../types';
 
+// Order: sport → distance → race/generic → conditions → splits → intensity → sweat → sodium → gut → profile → fuel kit
 const STEP_LABELS = [
-  'Sport', 'Distance', 'Splits', 'Intensity', 'Conditions',
+  'Sport', 'Distance', 'Race', 'Conditions', 'Splits', 'Intensity',
   'Sweat', 'Sodium', 'Gut', 'Profile', 'Fuel Kit',
 ];
 
@@ -51,16 +53,17 @@ export default function WizardShell({ state, onChange, onComplete, onHome }: Pro
   const stepProps = { state, onChange, onNext: next, onBack: back };
 
   const stepComponents = [
-    <Step01_SportType {...stepProps} />,
-    <Step02_RaceType {...stepProps} />,
-    <Step03_RaceDetails {...stepProps} />,
-    <Step04_Intensity {...stepProps} />,
-    <Step05_Conditions {...stepProps} />,
-    <Step06_SweatRate {...stepProps} />,
-    <Step07_Saltiness {...stepProps} />,
-    <Step08_GutTolerance {...stepProps} />,
-    <Step09_AthleteProfile {...stepProps} />,
-    <Step10_BrandSelector {...stepProps} />,
+    <Step01_SportType {...stepProps} />,          // 0 — Sport
+    <Step02_RaceType {...stepProps} />,           // 1 — Distance
+    <Step03_RaceSelector {...stepProps} />,       // 2 — Race or generic (NEW)
+    <Step05_Conditions {...stepProps} />,         // 3 — Conditions / weather
+    <Step03_RaceDetails {...stepProps} />,        // 4 — Splits
+    <Step04_Intensity {...stepProps} />,          // 5 — Intensity
+    <Step06_SweatRate {...stepProps} />,          // 6 — Sweat rate
+    <Step07_Saltiness {...stepProps} />,          // 7 — Sodium / saltiness
+    <Step08_GutTolerance {...stepProps} />,       // 8 — Gut tolerance
+    <Step09_AthleteProfile {...stepProps} />,     // 9 — Athlete profile
+    <Step10_BrandSelector {...stepProps} />,      // 10 — Fuel kit (final)
   ];
 
   return (

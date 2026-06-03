@@ -1,5 +1,4 @@
 import { motion } from 'framer-motion';
-import { Waves, Bike, PersonStanding, Zap } from 'lucide-react';
 import type { NutritionPlan, SegmentPlan } from '../../types';
 
 interface Props {
