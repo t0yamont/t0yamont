@@ -28,6 +28,11 @@ const DEFAULT_STATE: WizardState = {
   raceDate: null,
   location: null,
   weatherAuto: false,
+  // v4
+  selectedRace: null,
+  raceMode: 'generic',
+  gelDrinkSplit: 60,
+  planStyle: 'relaxed',
 };
 
 function AppInner() {

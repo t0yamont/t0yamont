@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronDown, Check, Zap, Plus, Trash2, FlaskConical, Loader2, TrendingUp, AlertTriangle } from 'lucide-react';
+import { ChevronDown, Check, Zap, Plus, Trash2, FlaskConical, Loader2, TrendingUp, AlertTriangle, Shield, SlidersHorizontal } from 'lucide-react';
 import type { WizardState, FuelBrand, FuelKit, Product, ProductType } from '../../types';
 import { BRAND_INFO, getAllProductsFlat, kitFromBrand, getProductById } from '../../data/brands';
 import { useAuth } from '../../auth/AuthProvider';
@@ -365,13 +365,20 @@ export default function Step10_BrandSelector({ state, onChange, onNext, onBack }
     onChange({ customProducts: custom.filter(p => p.id !== id) });
   };
 
-  // ── High-carb advanced eligibility (Change 4) ──────────────────────────────
+  // ── High-carb advanced eligibility ────────────────────────────────────────
   const kitHasMixed = [kit.primaryGelId, kit.cafGelId, kit.drinkId, kit.solidId]
     .filter(Boolean)
     .some(id => getProductById(id as string, custom)?.mixedCarb);
   const gutOk = state.gutTolerance === 'normal' || state.gutTolerance === 'iron';
   const showHighCarbToggle = kitHasMixed && gutOk;
   const highCarbOn = state.highCarbAdvanced ?? false;
+
+  // ── Gel/drink split ────────────────────────────────────────────────────────
+  const hasDrink = Boolean(kit.drinkId);
+  const gelSplit = state.gelDrinkSplit ?? 60;
+
+  // ── Sponsor restriction (from selectedRace) ────────────────────────────────
+  const sponsorRace = state.selectedRace?.sponsorRestricted ? state.selectedRace : null;
 
   const canProceed = Boolean(kit.primaryGelId);
 
@@ -454,7 +461,54 @@ export default function Step10_BrandSelector({ state, onChange, onNext, onBack }
           ))}
         </div>
 
-        {/* High-carb advanced opt-in (Change 4) */}
+        {/* Sponsor restriction notice */}
+        {sponsorRace && (
+          <motion.div
+            initial={{ opacity: 0, y: -8 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-2 bg-amber-500/8 border border-amber-400/25 rounded-xl p-4"
+          >
+            <Shield size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="text-amber-200 text-sm font-semibold">{sponsorRace.name}</p>
+              <p className="text-amber-200/80 text-xs leading-relaxed mt-0.5">
+                Only official sponsor brands ({(sponsorRace.allowedBrands ?? []).map(b => b === 'precision' ? 'PF&H' : b === 'maurten' ? 'Maurten' : b).join(' & ')}) are
+                available at aid stations. You can carry any brand in your kit, but only these
+                will be available on course.
+              </p>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Gel / drink split slider */}
+        {hasDrink && (
+          <div className="space-y-3 bg-white/3 border border-white/10 rounded-2xl p-4">
+            <div className="flex items-center gap-2">
+              <SlidersHorizontal size={14} className="text-cyan-400" />
+              <p className="text-white text-sm font-semibold flex-1">Gel / drink split</p>
+              <span className="text-cyan-400 font-mono text-sm font-bold">{gelSplit}% gels</span>
+            </div>
+            <input
+              type="range"
+              min={0}
+              max={100}
+              step={5}
+              value={gelSplit}
+              onChange={e => onChange({ gelDrinkSplit: parseInt(e.target.value) })}
+            />
+            <div className="flex justify-between text-slate-600 text-xs">
+              <span>All drink</span>
+              <span>{100 - gelSplit}% from drink</span>
+              <span>All gel</span>
+            </div>
+            <p className="text-slate-500 text-xs leading-relaxed">
+              Controls how the engine allocates carbs between gels and your drink mix.
+              Higher = more gels; lower = lean on your drink for carbs.
+            </p>
+          </div>
+        )}
+
+        {/* High-carb advanced opt-in */}
         {showHighCarbToggle && (
           <div className="space-y-2 bg-amber-500/5 border border-amber-400/20 rounded-2xl p-4">
             <button

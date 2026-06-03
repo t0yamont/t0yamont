@@ -127,9 +127,10 @@ function resolveKit(kit: FuelKit, custom: Product[]): {
 export function computePlan(state: WizardState): NutritionPlan {
   const { sport, splitTimes, intensity, tempCelsius, humidity,
           sweatRate, saltiness, crampFrequency, gutTolerance, athlete, fuelKit,
-          customProducts, highCarbAdvanced } = state;
+          customProducts, highCarbAdvanced, gelDrinkSplit } = state;
   const custom = customProducts ?? [];
   const advancedOptIn = highCarbAdvanced ?? false;
+  const splitPct = gelDrinkSplit ?? 60; // % carbs from gel/solid
 
   const intens = intensity       ?? 'moderate';
   const gut    = gutTolerance    ?? 'normal';
@@ -271,7 +272,7 @@ export function computePlan(state: WizardState): NutritionPlan {
   // ── Timeline ──────────────────────────────────────────────────────────────
   const legs = sp === 'triathlon' ? ['swim', 'bike', 'run'] : sp === 'cycling' ? ['bike'] : ['run'];
   const { items: timeline, caffeineMg: plannedCaffeineMg } = buildTimeline(
-    segments, resolved, gut, totalRaceMins, isTri, legs, needsMixedCarb,
+    segments, resolved, gut, totalRaceMins, isTri, legs, needsMixedCarb, splitPct,
   );
 
   // ── Caffeine insights ─────────────────────────────────────────────────────
@@ -372,6 +373,7 @@ function buildTimeline(
   _isTri: boolean,
   _legs: string[],
   _preferMixed: boolean,
+  gelSplitPct: number = 60,
 ): { items: ProductItem[]; caffeineMg: number } {
   const timeline: ProductItem[] = [];
   const minGelGap = gut === 'sensitive' ? 30 : 20;
@@ -451,9 +453,11 @@ function buildTimeline(
       }
     }
 
-    // Gel / solid schedule
+    // Gel / solid schedule — gelSplitPct controls how much carb comes from gels (vs drink).
     const totalTarget   = seg.carbsGPerHour * (seg.durationMins / 60);
-    const drinkCarbs    = drink && seg.segment === 'bike' ? drink.carbsG * Math.floor(seg.durationMins / 60) : 0;
+    const rawDrinkCarbs = drink && seg.segment === 'bike' ? drink.carbsG * Math.floor(seg.durationMins / 60) : 0;
+    // Cap drink carb contribution to (100 - gelSplitPct)% of total; gels fill the rest.
+    const drinkCarbs    = Math.min(rawDrinkCarbs, totalTarget * ((100 - gelSplitPct) / 100));
     const solidsTarget  = Math.max(0, totalTarget - drinkCarbs);
     const fuelProd      = seg.segment === 'run' ? runGel : primaryGel;
     const gelsNeeded    = fuelProd.carbsG > 0 ? Math.ceil(solidsTarget / fuelProd.carbsG) : 0;

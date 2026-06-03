@@ -1,4 +1,27 @@
 export type Sport = 'triathlon' | 'cycling' | 'running';
+export type AidItem = 'water' | 'carb_drink' | 'gel' | 'cola' | 'fruit' | 'bar' | 'ice';
+
+export interface AidStation {
+  km: number;           // distance from race start on that segment
+  segment: 'bike' | 'run';
+  has: AidItem[];
+}
+
+export interface Race {
+  id: string;
+  name: string;
+  series?: string;              // 'IRONMAN', 'IRONMAN 70.3', 'World Marathon Majors', etc.
+  sport: Sport;
+  distance: RaceDistance;
+  region: string;               // 'Europe', 'Americas', 'Asia-Pacific', 'Middle East', 'Africa'
+  city: string;
+  country: string;
+  location: { lat: number; lon: number };
+  typicalMonth: number;         // 1–12, used for weather default when no date set
+  sponsorRestricted: boolean;   // true for IRONMAN — only official sponsor brands available on course
+  allowedBrands?: FuelBrand[];
+  aidStations: AidStation[];    // empty = generic / unknown
+}
 export type RaceDistance = 'sprint' | 'olympic' | '70.3' | 'full' | 'crit' | 'gran_fondo' | 'century' | 'ultra' | '10k' | 'half_marathon' | 'marathon' | 'ultra_run';
 export type IntensityLevel = 'finish' | 'moderate' | 'limit';
 export type SweatRate = 'light' | 'moderate' | 'heavy' | 'very_heavy';
@@ -45,12 +68,17 @@ export interface WizardState {
   gutTolerance: GutTolerance | null;
   athlete: AthleteProfile;
   fuelKit: FuelKit;
-  brand: FuelBrand | null;    // metadata for quick-fill display
-  customProducts: Product[];  // user-defined product library (Change 2)
-  highCarbAdvanced: boolean;  // opt-in 120–150 g/h ceiling (Change 4)
+  brand: FuelBrand | null;
+  customProducts: Product[];
+  highCarbAdvanced: boolean;
   raceDate: string | null;
   location: { name: string; lat: number; lon: number } | null;
   weatherAuto: boolean;
+  // v4 additions
+  selectedRace: Race | null;           // null = generic / race not listed
+  raceMode: 'event' | 'generic';
+  gelDrinkSplit: number;               // 0–100; default 60 (% carbs from gel/solid)
+  planStyle: 'precise' | 'relaxed';   // results display preference
 }
 
 export interface SegmentPlan {

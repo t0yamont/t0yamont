@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
-import { MapPin, Loader2, Thermometer, Droplets, ToggleLeft, ToggleRight } from 'lucide-react';
+import { MapPin, Loader2, Thermometer, Droplets, ToggleLeft, ToggleRight, CheckCircle } from 'lucide-react';
 import type { WizardState } from '../../types';
 import { geocode, climateAverage, humidityFromTemp } from '../../data/weather';
 
@@ -30,12 +30,35 @@ function sweatRisk(temp: number, hum: string) {
 }
 
 export default function Step05_Conditions({ state, onChange, onNext, onBack }: Props) {
-  const [query, setQuery] = useState('');
+  const race = state.selectedRace;
+  const hasRace = state.raceMode === 'event' && race !== null;
+
+  const [query, setQuery] = useState(
+    hasRace ? `${race!.city}, ${race!.country}` : '',
+  );
   const [results, setResults] = useState<GeoResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [fetchingWeather, setFetchingWeather] = useState(false);
   const [weatherInfo, setWeatherInfo] = useState('');
   const debounceRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const autoFetchedRef = useRef(false);
+
+  // Auto-fetch weather when a race is pre-selected and we haven't done it yet.
+  useEffect(() => {
+    if (!hasRace || autoFetchedRef.current || state.weatherAuto) return;
+    autoFetchedRef.current = true;
+    const { lat, lon } = race!.location;
+    const month = race!.typicalMonth;
+    setFetchingWeather(true);
+    climateAverage(lat, lon, month, 15).then(result => {
+      if (result) {
+        const hum = humidityFromTemp(result.tempCelsius);
+        onChange({ tempCelsius: result.tempCelsius, humidity: hum, weatherAuto: true });
+        setWeatherInfo(`Typical for ${race!.city} in ${['','Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][month]}: ~${result.tempCelsius}°C`);
+      }
+    }).catch(() => {}).finally(() => setFetchingWeather(false));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasRace]);
 
   useEffect(() => {
     clearTimeout(debounceRef.current);
@@ -113,6 +136,17 @@ export default function Step05_Conditions({ state, onChange, onNext, onBack }: P
           </h1>
           <p className="text-slate-400 text-sm">Location + date auto-fills weather. You can override below.</p>
         </div>
+
+        {/* Race confirmation banner */}
+        {hasRace && (
+          <div className="flex items-center gap-3 bg-cyan-500/8 border border-cyan-400/25 rounded-xl px-4 py-3">
+            <CheckCircle size={16} className="text-cyan-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-cyan-200 text-sm font-semibold truncate">{race!.name}</p>
+              <p className="text-slate-400 text-xs">{race!.city}, {race!.country} · weather auto-loading…</p>
+            </div>
+          </div>
+        )}
 
         {/* Location search */}
         <div className="space-y-2">

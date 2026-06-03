@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { BarChart3, Layers, Clock, Sunrise, Package, PackageCheck, AlertTriangle, Info } from 'lucide-react';
+import { BarChart3, Layers, Clock, Sunrise, Package, PackageCheck, AlertTriangle, Info, MapPin, LayoutList, AlignLeft } from 'lucide-react';
 import type { WizardState, NutritionPlan } from '../../types';
 import NumbersSummary from './NumbersSummary';
 import SegmentBreakdown from './SegmentBreakdown';
@@ -31,6 +31,11 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
 
   const isHot = state.tempCelsius > 28;
   const isHighCarb = plan.totals.avgCarbsPerHour > 75 && state.gutTolerance === 'sensitive';
+  const planStyle   = state.planStyle ?? 'relaxed';
+  const selectedRace = state.selectedRace;
+
+  const [styleOverride, setStyleOverride] = useState<'precise' | 'relaxed' | null>(null);
+  const effectiveStyle = styleOverride ?? planStyle;
 
   return (
     <div className="flex flex-col min-h-screen max-w-md mx-auto w-full">
@@ -52,6 +57,31 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
               Redo
             </button>
           </div>
+        </div>
+
+        {/* Race badge */}
+        {selectedRace && (
+          <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+            <MapPin size={13} className="text-cyan-400 flex-shrink-0" />
+            <span className="text-slate-300 text-xs font-semibold truncate">{selectedRace.name}</span>
+            <span className="text-slate-500 text-xs ml-auto flex-shrink-0">{selectedRace.city}</span>
+          </div>
+        )}
+
+        {/* Plan style toggle */}
+        <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl p-1 no-print">
+          {([['relaxed', 'Relaxed', AlignLeft], ['precise', 'Precise', LayoutList]] as const).map(([id, label, Icon]) => (
+            <button
+              key={id}
+              onClick={() => setStyleOverride(id)}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold transition-all ${
+                effectiveStyle === id ? 'bg-cyan-500/20 text-cyan-300' : 'text-slate-400 hover:text-white'
+              }`}
+            >
+              <Icon size={12} />
+              {label}
+            </button>
+          ))}
         </div>
 
         {/* Warnings */}
@@ -121,7 +151,7 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
             {activeTab === 'segments' && <SegmentBreakdown plan={plan} />}
             {activeTab === 'timeline' && <RaceTimeline plan={plan} />}
             {activeTab === 'prerace' && <PreRacePlan plan={plan} athlete={state.athlete} />}
-            {activeTab === 'schedule' && <ProductSchedule plan={plan} state={state} />}
+            {activeTab === 'schedule' && <ProductSchedule plan={plan} state={state} planStyle={effectiveStyle} />}
             {activeTab === 'packlist' && <PackList plan={plan} state={state} />}
           </motion.div>
         </AnimatePresence>
