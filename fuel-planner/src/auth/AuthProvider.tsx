@@ -28,6 +28,17 @@ function friendlyAuthError(msg: string): string {
   return msg;
 }
 
+// Guard against a request that never resolves (e.g. blocked network, a stalled
+// auth lock) so the UI can show an error instead of spinning forever.
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    promise,
+    new Promise<T>((_, reject) =>
+      setTimeout(() => reject(new Error('Request timed out — check your connection and Supabase settings.')), ms),
+    ),
+  ]);
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -38,10 +49,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    supabase.auth.getUser().then(({ data }) => {
-      setUser(data.user);
+    // Read the session from local storage (no network call) so startup can't
+    // hang or hold an auth lock. getUser() would make a network request.
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null);
       setLoading(false);
-    });
+    }).catch(() => setLoading(false));
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
@@ -51,13 +64,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    return { error: error ? friendlyAuthError(error.message) : null };
+    try {
+      const { error } = await withTimeout(
+        supabase.auth.signInWithPassword({ email, password }),
+        20000,
+      );
+      return { error: error ? friendlyAuthError(error.message) : null };
+    } catch (e) {
+      return { error: friendlyAuthError(e instanceof Error ? e.message : String(e)) };
+    }
   };
 
   const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({ email, password });
-    return { error: error ? friendlyAuthError(error.message) : null };
+    try {
+      const { error } = await withTimeout(
+        supabase.auth.signUp({ email, password }),
+        20000,
+      );
+      return { error: error ? friendlyAuthError(error.message) : null };
+    } catch (e) {
+      return { error: friendlyAuthError(e instanceof Error ? e.message : String(e)) };
+    }
   };
 
   const signOut = async () => {

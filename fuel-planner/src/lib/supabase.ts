@@ -15,7 +15,18 @@ export const isSupabaseConfigured = () => configured;
 // Only create the real client when credentials exist.
 // All callers (AuthProvider etc.) guard with isSupabaseConfigured() before using this.
 export const supabase = configured
-  ? createClient(supabaseUrl, supabaseAnonKey)
+  ? createClient(supabaseUrl, supabaseAnonKey, {
+      auth: {
+        persistSession: true,
+        autoRefreshToken: true,
+        detectSessionInUrl: true,
+        // Pass-through lock. By default supabase-js serializes auth calls with
+        // the Web Locks API (navigator.locks). Brave and some privacy browsers
+        // block or stall that API, which makes signInWithPassword / signUp hang
+        // forever ("eternal loading"). Running the callback directly avoids it.
+        lock: async (_name, _acquireTimeout, fn) => fn(),
+      },
+    })
   : ({} as ReturnType<typeof createClient>);
 
 /** Returns a human-readable diagnosis if the URL looks wrong. */
