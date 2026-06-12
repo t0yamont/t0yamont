@@ -40,7 +40,7 @@ export default function Step03_RaceDetails({ state, onChange, onNext, onBack }: 
   const canProceed = sliders.every(s => s.value > 0);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3rem)] px-4 max-w-md mx-auto w-full">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3rem)] px-4 max-w-md md:max-w-xl mx-auto w-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

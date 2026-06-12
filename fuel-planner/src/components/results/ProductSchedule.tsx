@@ -1,6 +1,7 @@
 import { Printer } from 'lucide-react';
 import type { NutritionPlan, WizardState, ProductItem } from '../../types';
 import { BRAND_INFO } from '../../data/brands';
+import BrandLogo from '../BrandLogo';
 
 interface Props {
   plan: NutritionPlan;
@@ -150,7 +151,7 @@ function RelaxedSchedule({ timeline, plan }: { timeline: ProductItem[]; plan: Nu
             <div className="space-y-2">
               {gels.length > 0 && (
                 <div className="flex items-start gap-2">
-                  <span className="text-amber-400 flex-shrink-0 mt-0.5">🟡</span>
+                  <span className="text-amber-400 shrink-0 mt-0.5">🟡</span>
                   <p className="text-slate-300 text-sm leading-relaxed">
                     <strong>{productFrequencyLine(gels)}</strong>
                     {durationMins > 0 && gels.length > 1 && (
@@ -162,7 +163,7 @@ function RelaxedSchedule({ timeline, plan }: { timeline: ProductItem[]; plan: Nu
 
               {drinks.length > 0 && (
                 <div className="flex items-start gap-2">
-                  <span className="text-blue-400 flex-shrink-0 mt-0.5">💧</span>
+                  <span className="text-blue-400 shrink-0 mt-0.5">💧</span>
                   <p className="text-slate-300 text-sm leading-relaxed">
                     <strong>{productFrequencyLine(drinks)}</strong>
                     {label === 'Run' && (
@@ -174,7 +175,7 @@ function RelaxedSchedule({ timeline, plan }: { timeline: ProductItem[]; plan: Nu
 
               {cafItems.length > 0 && (
                 <div className="flex items-start gap-2">
-                  <span className="text-purple-400 flex-shrink-0 mt-0.5">☕</span>
+                  <span className="text-purple-400 shrink-0 mt-0.5">☕</span>
                   <p className="text-slate-300 text-sm">
                     Caffeine: {cafItems.map(i => i.product).join(', ')} at key moments
                   </p>
@@ -204,11 +205,14 @@ export default function ProductSchedule({ plan, state, planStyle = 'precise' }: 
   return (
     <div className="px-4 py-5 space-y-4">
       <div className="flex items-center justify-between">
-        <div>
-          <p className="text-slate-400 text-xs uppercase tracking-widest">Fuel Kit</p>
-          <p className="text-white font-bold" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.1rem' }}>
-            {kitLabel}
-          </p>
+        <div className="flex items-center gap-3">
+          {state.brand && <BrandLogo brand={state.brand} size={34} />}
+          <div>
+            <p className="text-slate-400 text-xs uppercase tracking-widest">Fuel Kit</p>
+            <p className="text-white font-bold" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.1rem' }}>
+              {kitLabel}
+            </p>
+          </div>
         </div>
         <button
           onClick={() => window.print()}

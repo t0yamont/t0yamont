@@ -11,6 +11,10 @@
   box-sizing: border-box;
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
 body {
   background-color: #0a0f1a;
   color: #f1f5f9;
@@ -22,12 +26,56 @@ body {
     linear-gradient(rgba(0, 212, 255, 0.03) 1px, transparent 1px),
     linear-gradient(90deg, rgba(0, 212, 255, 0.03) 1px, transparent 1px);
   background-size: 40px 40px;
+  overflow-x: hidden;
+}
+
+/* Ambient aurora orbs — slow drifting colour washes behind all content */
+body::before,
+body::after {
+  content: '';
+  position: fixed;
+  width: 65vmax;
+  height: 65vmax;
+  border-radius: 50%;
+  filter: blur(90px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body::before {
+  background: radial-gradient(circle, rgba(0, 212, 255, 0.10), transparent 60%);
+  top: -25vmax;
+  right: -20vmax;
+  animation: drift-a 26s ease-in-out infinite alternate;
+}
+
+body::after {
+  background: radial-gradient(circle, rgba(124, 58, 237, 0.09), transparent 60%);
+  bottom: -28vmax;
+  left: -20vmax;
+  animation: drift-b 32s ease-in-out infinite alternate;
+}
+
+@keyframes drift-a {
+  from { transform: translate(0, 0) scale(1); }
+  to   { transform: translate(-12vmax, 10vmax) scale(1.15); }
+}
+
+@keyframes drift-b {
+  from { transform: translate(0, 0) scale(1.1); }
+  to   { transform: translate(10vmax, -10vmax) scale(0.95); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation: none; }
 }
 
 #root {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1;
 }
 
 h1, h2, h3, .display {
@@ -36,6 +84,45 @@ h1, h2, h3, .display {
 
 .mono {
   font-family: 'JetBrains Mono', monospace;
+}
+
+/* Animated gradient headline */
+.text-gradient-animated {
+  background: linear-gradient(90deg, #00d4ff, #10b981, #38bdf8, #00d4ff);
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradient-pan 6s linear infinite;
+}
+
+@keyframes gradient-pan {
+  to { background-position: 300% center; }
+}
+
+/* Soft pulsing glow — for primary CTAs */
+.glow-pulse {
+  animation: glow-pulse 2.6s ease-in-out infinite;
+}
+
+@keyframes glow-pulse {
+  0%, 100% { box-shadow: 0 0 18px rgba(0, 212, 255, 0.25); }
+  50%      { box-shadow: 0 0 32px rgba(0, 212, 255, 0.45); }
+}
+
+/* Tactile press on all interactive buttons (base layer so utilities still win) */
+@layer base {
+  button:not(:disabled):active {
+    transform: scale(0.975);
+  }
+  ::selection {
+    background: rgba(0, 212, 255, 0.3);
+    color: #fff;
+  }
+  :focus-visible {
+    outline: 2px solid rgba(0, 212, 255, 0.6);
+    outline-offset: 2px;
+  }
 }
 
 input[type="range"] {
@@ -57,6 +144,12 @@ input[type="range"]::-webkit-slider-thumb {
   background: #00d4ff;
   cursor: pointer;
   box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.8);
 }
 
 input[type="range"]::-moz-range-thumb {
@@ -67,6 +160,12 @@ input[type="range"]::-moz-range-thumb {
   cursor: pointer;
   box-shadow: 0 0 8px rgba(0, 212, 255, 0.5);
   border: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+input[type="range"]::-moz-range-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 14px rgba(0, 212, 255, 0.8);
 }
 
 @media print {
@@ -74,6 +173,9 @@ input[type="range"]::-moz-range-thumb {
     background: white !important;
     color: black !important;
     background-image: none !important;
+  }
+  body::before, body::after {
+    display: none !important;
   }
   .no-print {
     display: none !important;
@@ -104,4 +206,14 @@ input[type="range"]::-moz-range-thumb {
 ::-webkit-scrollbar-thumb {
   background: rgba(0, 212, 255, 0.3);
   border-radius: 2px;
+}
+
+@media (min-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-thumb {
+    border-radius: 4px;
+  }
 }

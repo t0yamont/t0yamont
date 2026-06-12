@@ -98,13 +98,13 @@ export default function MyPlans({ isOpen, onClose, onLoadPlan }: Props) {
                       <p className="text-white font-medium truncate">{plan.name}</p>
                       <p className="text-slate-500 text-xs">{formatDate(plan.created_at)}</p>
                     </div>
-                    <ChevronRight className="text-slate-600 group-hover:text-cyan-400 transition-colors flex-shrink-0" size={16} />
+                    <ChevronRight className="text-slate-600 group-hover:text-cyan-400 transition-colors shrink-0" size={16} />
                     <button
                       onClick={e => {
                         e.stopPropagation();
                         deletePlan(plan.id);
                       }}
-                      className="text-slate-600 hover:text-red-400 transition-colors flex-shrink-0"
+                      className="text-slate-600 hover:text-red-400 transition-colors shrink-0"
                     >
                       <Trash2 size={14} />
                     </button>

@@ -1,6 +1,23 @@
-import { motion } from 'framer-motion';
+import { useEffect, useRef } from 'react';
+import { motion, animate } from 'framer-motion';
 import { AlertTriangle, Info, CheckCircle } from 'lucide-react';
 import type { NutritionPlan, WizardState } from '../../types';
+
+/** Counts up from 0 to `value` on mount — makes the headline numbers land with weight. */
+function AnimatedNumber({ value }: { value: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const controls = animate(0, value, {
+      duration: 0.9,
+      ease: 'easeOut',
+      onUpdate: v => { node.textContent = String(Math.round(v)); },
+    });
+    return () => controls.stop();
+  }, [value]);
+  return <span ref={ref}>{value}</span>;
+}
 
 interface Props {
   plan: NutritionPlan;
@@ -33,7 +50,7 @@ function MetricCard({ label, value, unit, color, min, max, note, subNote }: Metr
           <p className="text-slate-400 text-xs uppercase tracking-widest mb-1">{label}</p>
           <div className="flex items-baseline gap-1">
             <span className="text-4xl font-bold" style={{ fontFamily: 'JetBrains Mono, monospace', color }}>
-              {value}
+              <AnimatedNumber value={value} />
             </span>
             <span className="text-slate-400 text-sm">{unit}</span>
           </div>
@@ -48,9 +65,12 @@ function MetricCard({ label, value, unit, color, min, max, note, subNote }: Metr
 
       <div className="space-y-1">
         <div className="relative h-2 bg-white/10 rounded-full overflow-hidden">
-          <div
-            className="absolute inset-y-0 left-0 rounded-full transition-all duration-700"
-            style={{ width: `${pct}%`, background: color, boxShadow: `0 0 6px ${color}` }}
+          <motion.div
+            initial={{ width: 0 }}
+            animate={{ width: `${pct}%` }}
+            transition={{ duration: 0.9, ease: 'easeOut', delay: 0.15 }}
+            className="absolute inset-y-0 left-0 rounded-full"
+            style={{ background: color, boxShadow: `0 0 6px ${color}` }}
           />
         </div>
         <div className="flex justify-between text-slate-600 text-xs">
@@ -85,7 +105,7 @@ export default function NumbersSummary({ plan, state }: Props) {
           animate={{ opacity: 1, y: 0 }}
           className="flex items-start gap-2 bg-orange-500/10 border border-orange-400/30 rounded-xl p-3"
         >
-          <AlertTriangle size={14} className="text-orange-400 flex-shrink-0 mt-0.5" />
+          <AlertTriangle size={14} className="text-orange-400 shrink-0 mt-0.5" />
           <p className="text-orange-200 text-xs leading-relaxed">{mixedCarbNotice}</p>
         </motion.div>
       )}
@@ -107,40 +127,41 @@ export default function NumbersSummary({ plan, state }: Props) {
         }
       />
 
-      {/* Fluid — shows both estimated sweat and recommended intake */}
-      <MetricCard
-        label="Fluid (recommended)"
-        value={recommendedFluidMlH}
-        unit="ml/h"
-        color="#10b981"
-        min={300}
-        max={1400}
-        note="Targets replace ~70% of estimated sweat loss — modern practice tolerates mild dehydration (keep losses under 2–3% body mass) to reduce GI distress and hyponatremia risk."
-        subNote={
-          <div className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5 mt-1">
-            <div className="text-center">
-              <p className="text-xs font-mono font-bold text-emerald-400">{recommendedFluidMlH} ml/h</p>
-              <p className="text-slate-500 text-xs mt-0.5">intake target</p>
+      {/* Fluid + sodium — side by side on desktop */}
+      <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
+        <MetricCard
+          label="Fluid (recommended)"
+          value={recommendedFluidMlH}
+          unit="ml/h"
+          color="#10b981"
+          min={300}
+          max={1400}
+          note="Targets replace ~70% of estimated sweat loss — modern practice tolerates mild dehydration (keep losses under 2–3% body mass) to reduce GI distress and hyponatremia risk."
+          subNote={
+            <div className="flex items-center justify-between bg-white/5 rounded-xl px-4 py-2.5 mt-1">
+              <div className="text-center">
+                <p className="text-xs font-mono font-bold text-emerald-400">{recommendedFluidMlH} ml/h</p>
+                <p className="text-slate-500 text-xs mt-0.5">intake target</p>
+              </div>
+              <div className="text-slate-600 text-xs">÷ 0.70 →</div>
+              <div className="text-center">
+                <p className="text-xs font-mono font-bold text-slate-300">{estimatedSweatRateMlH} ml/h</p>
+                <p className="text-slate-500 text-xs mt-0.5">estimated sweat</p>
+              </div>
             </div>
-            <div className="text-slate-600 text-xs">÷ 0.70 →</div>
-            <div className="text-center">
-              <p className="text-xs font-mono font-bold text-slate-300">{estimatedSweatRateMlH} ml/h</p>
-              <p className="text-slate-500 text-xs mt-0.5">estimated sweat</p>
-            </div>
-          </div>
-        }
-      />
+          }
+        />
 
-      {/* Sodium */}
-      <MetricCard
-        label="Sodium"
-        value={avgSodiumPerHour}
-        unit="mg/h"
-        color="#f59e0b"
-        min={200}
-        max={1500}
-        note="From electrolyte drinks, gels, and capsules. Scales with your fluid intake — if you drink more, you absorb more sodium."
-      />
+        <MetricCard
+          label="Sodium"
+          value={avgSodiumPerHour}
+          unit="mg/h"
+          color="#f59e0b"
+          min={200}
+          max={1500}
+          note="From electrolyte drinks, gels, and capsules. Scales with your fluid intake — if you drink more, you absorb more sodium."
+        />
+      </div>
 
       {/* Caffeine row — only shown if caffeine is in the plan */}
       {plannedCaffeineMg > 0 && (
@@ -157,11 +178,11 @@ export default function NumbersSummary({ plan, state }: Props) {
         >
           <div className="flex items-center gap-2">
             {caffeineFlag === 'high' ? (
-              <AlertTriangle size={14} className="text-red-400 flex-shrink-0" />
+              <AlertTriangle size={14} className="text-red-400 shrink-0" />
             ) : caffeineFlag === 'low' ? (
-              <Info size={14} className="text-slate-400 flex-shrink-0" />
+              <Info size={14} className="text-slate-400 shrink-0" />
             ) : (
-              <CheckCircle size={14} className="text-purple-400 flex-shrink-0" />
+              <CheckCircle size={14} className="text-purple-400 shrink-0" />
             )}
             <p className="text-xs font-semibold" style={{
               color: caffeineFlag === 'high' ? '#f87171'

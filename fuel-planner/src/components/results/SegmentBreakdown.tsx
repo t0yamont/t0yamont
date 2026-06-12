@@ -77,7 +77,7 @@ function SegCard({ seg }: { seg: SegmentPlan }) {
       <ul className="space-y-1.5">
         {seg.notes.map((note, i) => (
           <li key={i} className="flex items-start gap-2 text-slate-400 text-xs">
-            <span className="mt-0.5 flex-shrink-0" style={{ color: meta.color }}>›</span>
+            <span className="mt-0.5 shrink-0" style={{ color: meta.color }}>›</span>
             {note}
           </li>
         ))}
@@ -88,7 +88,7 @@ function SegCard({ seg }: { seg: SegmentPlan }) {
 
 export default function SegmentBreakdown({ plan }: Props) {
   return (
-    <div className="px-4 py-5 space-y-3">
+    <div className="px-4 py-5 space-y-3 md:space-y-0 md:grid md:grid-cols-2 md:gap-4">
       {plan.segments.map((seg, i) => (
         <SegCard key={`${seg.segment}-${i}`} seg={seg} />
       ))}

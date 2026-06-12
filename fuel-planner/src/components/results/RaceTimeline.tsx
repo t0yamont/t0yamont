@@ -20,9 +20,9 @@ function EventNode({ item, index }: { item: ProductItem; index: number }) {
       className="flex gap-4 relative"
     >
       {/* Timeline line */}
-      <div className="flex flex-col items-center flex-shrink-0">
+      <div className="flex flex-col items-center shrink-0">
         <div
-          className="w-3 h-3 rounded-full flex-shrink-0 mt-1.5"
+          className="w-3 h-3 rounded-full shrink-0 mt-1.5"
           style={{ background: color, boxShadow: `0 0 6px ${color}` }}
         />
         <div className="w-px flex-1 bg-white/10 mt-1" style={{ minHeight: '32px' }} />
@@ -94,8 +94,8 @@ export default function RaceTimeline({ plan }: Props) {
 
         {/* Finish node */}
         <div className="flex gap-4">
-          <div className="flex flex-col items-center flex-shrink-0">
-            <div className="w-4 h-4 rounded-full border-2 border-emerald-400 flex-shrink-0 mt-1" />
+          <div className="flex flex-col items-center shrink-0">
+            <div className="w-4 h-4 rounded-full border-2 border-emerald-400 shrink-0 mt-1" />
           </div>
           <div className="pb-4">
             <p className="text-emerald-400 font-bold text-sm mt-0.5" style={{ fontFamily: 'Barlow Condensed, sans-serif' }}>

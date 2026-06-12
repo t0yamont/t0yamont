@@ -49,24 +49,24 @@ function RaceCard({ race, selected, onSelect }: { race: Race; selected: boolean;
           <div className="flex items-center gap-2 flex-wrap">
             <span className="text-white text-sm font-semibold leading-tight">{race.name}</span>
             {race.sponsorRestricted && (
-              <span className="flex items-center gap-1 bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs px-2 py-0.5 rounded-full flex-shrink-0">
+              <span className="flex items-center gap-1 bg-amber-500/15 border border-amber-400/30 text-amber-300 text-xs px-2 py-0.5 rounded-full shrink-0">
                 <Shield size={10} />
                 Sponsor brand
               </span>
             )}
           </div>
           <div className="flex items-center gap-2 mt-0.5">
-            <MapPin size={11} className="text-slate-500 flex-shrink-0" />
+            <MapPin size={11} className="text-slate-500 shrink-0" />
             <span className="text-slate-400 text-xs">{race.city}, {race.country}</span>
             <span className="text-slate-600 text-xs">·</span>
-            <Calendar size={11} className="text-slate-500 flex-shrink-0" />
+            <Calendar size={11} className="text-slate-500 shrink-0" />
             <span className="text-slate-400 text-xs">typically {MONTH_NAMES[race.typicalMonth]}</span>
           </div>
         </div>
         {selected ? (
-          <CheckCircle size={18} className="text-cyan-400 flex-shrink-0 mt-0.5" />
+          <CheckCircle size={18} className="text-cyan-400 shrink-0 mt-0.5" />
         ) : (
-          <div className="w-4.5 h-4.5 rounded-full border-2 border-white/20 flex-shrink-0 mt-0.5" />
+          <div className="w-4.5 h-4.5 rounded-full border-2 border-white/20 shrink-0 mt-0.5" />
         )}
       </button>
 
@@ -79,7 +79,7 @@ function RaceCard({ race, selected, onSelect }: { race: Race; selected: boolean;
           <div className="px-4 pb-3 space-y-3 border-t border-white/5 pt-3">
             {race.sponsorRestricted && race.allowedBrands && (
               <div className="flex items-start gap-2 bg-amber-500/10 border border-amber-400/25 rounded-lg p-3">
-                <Shield size={13} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                <Shield size={13} className="text-amber-400 shrink-0 mt-0.5" />
                 <p className="text-amber-200 text-xs leading-relaxed">
                   <strong>Official sponsor brands only</strong> at on-course aid stations:{' '}
                   {race.allowedBrands.map(b => b === 'precision' ? 'Precision Fuel & Hydration' : 'Maurten').join(' & ')}.
@@ -124,7 +124,7 @@ function RaceCard({ race, selected, onSelect }: { race: Race; selected: boolean;
                       <div className="space-y-1.5">
                         {race.aidStations.map((a, i) => (
                           <div key={i} className="flex items-center gap-3 text-xs">
-                            <span className="text-slate-500 font-mono w-14 flex-shrink-0">
+                            <span className="text-slate-500 font-mono w-14 shrink-0">
                               {a.segment === 'bike' ? '🚲' : '🏃'} km {a.km}
                             </span>
                             <AidBadge items={a.has} />
@@ -171,7 +171,7 @@ export default function Step03_RaceSelector({ state, onChange, onNext, onBack }:
   const canProceed = state.raceMode === 'event' ? state.selectedRace !== null : state.raceMode === 'generic';
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md mx-auto w-full py-8">
+    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md md:max-w-2xl mx-auto w-full py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -240,9 +240,9 @@ export default function Step03_RaceSelector({ state, onChange, onNext, onBack }:
             <p className="text-slate-500 text-xs mt-0.5">Enter location and conditions manually on the next step</p>
           </div>
           {state.raceMode === 'generic' ? (
-            <CheckCircle size={18} className="text-slate-400 flex-shrink-0" />
+            <CheckCircle size={18} className="text-slate-400 shrink-0" />
           ) : (
-            <div className="w-4 h-4 rounded-full border-2 border-white/20 flex-shrink-0" />
+            <div className="w-4 h-4 rounded-full border-2 border-white/20 shrink-0" />
           )}
         </button>
 

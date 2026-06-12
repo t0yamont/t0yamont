@@ -45,29 +45,31 @@ export default function Step08_GutTolerance({ state, onChange, onNext, onBack }:
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3rem)] px-4 max-w-md mx-auto w-full">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-3rem)] px-4 max-w-md md:max-w-2xl mx-auto w-full">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full space-y-6"
+        className="w-full space-y-6 md:space-y-8"
       >
         <div className="space-y-2">
           <button onClick={onBack} className="text-slate-500 hover:text-cyan-400 text-sm transition-colors">
             ← Back
           </button>
-          <h1 className="text-4xl font-bold text-white" style={{ fontFamily: 'Barlow Condensed, sans-serif' }}>
+          <h1 className="text-4xl md:text-5xl font-bold text-white" style={{ fontFamily: 'Barlow Condensed, sans-serif' }}>
             Gut tolerance
           </h1>
           <p className="text-slate-400 text-sm">This adjusts gel frequency, format recommendations, and carb rate.</p>
         </div>
 
-        <div className="grid gap-3">
+        <div className="grid gap-3 md:gap-4">
           {OPTIONS.map((opt, i) => (
             <motion.button
               key={opt.id}
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.07 }}
+              whileHover={{ y: -3 }}
+              whileTap={{ scale: 0.98 }}
               onClick={() => select(opt.id)}
               className={`flex items-start gap-4 p-5 rounded-2xl border transition-all text-left ${
                 state.gutTolerance === opt.id

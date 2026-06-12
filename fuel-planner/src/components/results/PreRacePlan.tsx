@@ -27,7 +27,7 @@ function Section({
         onClick={() => setOpen(v => !v)}
         className="w-full flex items-center gap-3 p-5 text-left"
       >
-        <div className="flex-shrink-0" style={{ color }}>
+        <div className="shrink-0" style={{ color }}>
           {icon}
         </div>
         <span className="flex-1 text-white font-bold" style={{ fontFamily: 'Barlow Condensed, sans-serif', fontSize: '1.1rem' }}>
@@ -53,7 +53,7 @@ function Section({
               {items.map((item, i) => (
                 <li key={i} className="flex items-start gap-2.5">
                   <div
-                    className="w-1.5 h-1.5 rounded-full flex-shrink-0 mt-2"
+                    className="w-1.5 h-1.5 rounded-full shrink-0 mt-2"
                     style={{ background: color }}
                   />
                   <p className="text-slate-300 text-sm leading-relaxed">{item}</p>

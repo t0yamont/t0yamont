@@ -26,7 +26,7 @@ export default function Step07_Saltiness({ state, onChange, onNext, onBack }: Pr
   const canProceed = state.saltiness && state.crampFrequency;
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md mx-auto w-full py-8">
+    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md md:max-w-2xl mx-auto w-full py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -47,7 +47,7 @@ export default function Step07_Saltiness({ state, onChange, onNext, onBack }: Pr
           <h3 className="text-white font-semibold text-sm uppercase tracking-widest">
             How salty is your sweat?
           </h3>
-          <div className="grid gap-2">
+          <div className="grid gap-2 md:grid-cols-2">
             {SALT_OPTIONS.map(opt => (
               <button
                 key={opt.id}

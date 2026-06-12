@@ -33,11 +33,11 @@ function ItemRow({
         type="checkbox"
         checked={checked}
         onChange={() => onToggle(checkKey)}
-        className="accent-cyan-500 w-4 h-4 mt-0.5 flex-shrink-0"
+        className="accent-cyan-500 w-4 h-4 mt-0.5 shrink-0"
       />
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-cyan-400 font-mono text-sm font-bold flex-shrink-0">{countLabel(item)}</span>
+          <span className="text-cyan-400 font-mono text-sm font-bold shrink-0">{countLabel(item)}</span>
           <span className={`text-white text-sm ${checked ? 'line-through text-slate-500' : ''}`}>{item.product}</span>
           {item.isCaffeine && <span className="text-purple-400 text-xs">☕</span>}
         </div>
@@ -60,7 +60,8 @@ export default function PackList({ plan, state }: Props) {
   const toggle = (k: string) =>
     setChecked(prev => {
       const next = new Set(prev);
-      next.has(k) ? next.delete(k) : next.add(k);
+      if (next.has(k)) next.delete(k);
+      else next.add(k);
       return next;
     });
 
@@ -171,7 +172,7 @@ export default function PackList({ plan, state }: Props) {
         animate={{ opacity: 1 }}
         className="flex items-start gap-2 bg-orange-500/10 border border-orange-400/25 rounded-xl p-4"
       >
-        <span className="text-orange-400 flex-shrink-0">＋</span>
+        <span className="text-orange-400 shrink-0">＋</span>
         <p className="text-orange-200 text-xs leading-relaxed">
           <strong>Pack {pack.spareGels.low}–{pack.spareGels.high} spare gels</strong> (1–2 extra per hour) beyond the plan
           in case of drops or a bad patch. These are not counted in the totals above.
