@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const signIn = async (email: string, password: string) => {
+    if (!isSupabaseConfigured()) return { error: 'Account features are not enabled in this environment.' };
     try {
       const { error } = await withTimeout(
         supabase.auth.signInWithPassword({ email, password }),
@@ -76,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const signUp = async (email: string, password: string) => {
+    if (!isSupabaseConfigured()) return { error: 'Account features are not enabled in this environment.' };
     try {
       const { error } = await withTimeout(
         supabase.auth.signUp({ email, password }),
