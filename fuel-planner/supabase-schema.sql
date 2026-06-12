@@ -42,3 +42,25 @@ create policy "own custom products"
   on custom_products for all
   using (auth.uid() = user_id)
   with check (auth.uid() = user_id);
+
+-- Post-race log — one entry per plan (plan_id is unique)
+create table post_race_log (
+  id uuid primary key default gen_random_uuid(),
+  plan_id uuid not null unique references plans(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  actual_splits jsonb not null default '{}',
+  actual_items jsonb not null default '[]',
+  notes text not null default '',
+  created_at timestamptz default now()
+);
+
+alter table post_race_log enable row level security;
+
+create policy "users read own race logs"
+  on post_race_log for select using (auth.uid() = user_id);
+create policy "users insert own race logs"
+  on post_race_log for insert with check (auth.uid() = user_id);
+create policy "users update own race logs"
+  on post_race_log for update using (auth.uid() = user_id);
+create policy "users delete own race logs"
+  on post_race_log for delete using (auth.uid() = user_id);

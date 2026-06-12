@@ -4,7 +4,7 @@ import { AuthProvider } from './auth/AuthProvider';
 import WizardShell from './components/WizardShell';
 import ResultsShell from './components/results/ResultsShell';
 import AuthModal from './components/AuthModal';
-import MyPlans from './plans/MyPlans';
+import UserPage from './pages/UserPage';
 import HomePage from './pages/HomePage';
 import { computePlan } from './data/calculations';
 import type { WizardState, NutritionPlan } from './types';
@@ -40,7 +40,7 @@ function AppInner() {
   const [plan, setPlan] = useState<NutritionPlan | null>(null);
   const [showHome, setShowHome] = useState(true);
   const [showAuth, setShowAuth] = useState(false);
-  const [showPlans, setShowPlans] = useState(false);
+  const [showUserPage, setShowUserPage] = useState(false);
 
   const updateState = (partial: Partial<WizardState>) => {
     setWizardState(prev => ({ ...prev, ...partial }));
@@ -55,6 +55,7 @@ function AppInner() {
     setPlan(null);
     setWizardState(DEFAULT_STATE);
     setShowHome(true);
+    setShowUserPage(false);
   };
 
   const handleLoadPlan = (state: WizardState) => {
@@ -62,21 +63,30 @@ function AppInner() {
     const computed = computePlan(state);
     setPlan(computed);
     setShowHome(false);
+    setShowUserPage(false);
   };
 
   const handleStart = () => {
     setShowHome(false);
+    setShowUserPage(false);
   };
 
   return (
     <div className="min-h-screen">
       <AnimatePresence mode="wait">
-        {showHome ? (
+        {showUserPage ? (
+          <UserPage
+            key="user"
+            onBack={() => setShowUserPage(false)}
+            onLoadPlan={handleLoadPlan}
+            onShowAuth={() => setShowAuth(true)}
+          />
+        ) : showHome ? (
           <HomePage
             key="home"
             onStart={handleStart}
             onShowAuth={() => setShowAuth(true)}
-            onShowPlans={() => setShowPlans(true)}
+            onShowPlans={() => setShowUserPage(true)}
           />
         ) : plan === null ? (
           <WizardShell
@@ -100,12 +110,6 @@ function AppInner() {
         isOpen={showAuth}
         onClose={() => setShowAuth(false)}
         onSuccess={() => setShowAuth(false)}
-      />
-
-      <MyPlans
-        isOpen={showPlans}
-        onClose={() => setShowPlans(false)}
-        onLoadPlan={handleLoadPlan}
       />
     </div>
   );

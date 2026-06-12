@@ -1,7 +1,6 @@
 import { motion } from 'framer-motion';
 import { Zap, BarChart2, CloudRain, Layers, User, BookOpen, MapPin, ArrowRight } from 'lucide-react';
 import { useAuth } from '../auth/AuthProvider';
-import { isSupabaseConfigured } from '../lib/supabase';
 import BrandLogo from '../components/BrandLogo';
 import { BRAND_INFO } from '../data/brands';
 import type { FuelBrand } from '../types';
@@ -55,36 +54,34 @@ export default function HomePage({ onStart, onShowAuth, onShowPlans }: Props) {
             FUEL PLANNER
           </span>
         </div>
-        {isSupabaseConfigured() && (
-          <div className="flex items-center gap-2">
-            {user ? (
-              <>
-                <button
-                  onClick={onShowPlans}
-                  className="flex items-center gap-1.5 text-slate-400 hover:text-white text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all"
-                >
-                  <BookOpen size={13} />
-                  My Plans
-                </button>
-                <button
-                  onClick={signOut}
-                  className="text-slate-500 hover:text-slate-300 transition-colors"
-                  title="Sign out"
-                >
-                  <User size={16} />
-                </button>
-              </>
-            ) : (
+        <div className="flex items-center gap-2">
+          {user ? (
+            <>
               <button
-                onClick={onShowAuth}
+                onClick={onShowPlans}
                 className="flex items-center gap-1.5 text-slate-400 hover:text-white text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all"
               >
-                <User size={13} />
-                Sign In / Register
+                <BookOpen size={13} />
+                My Plans
               </button>
-            )}
-          </div>
-        )}
+              <button
+                onClick={signOut}
+                className="text-slate-500 hover:text-slate-300 transition-colors"
+                title="Sign out"
+              >
+                <User size={16} />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={onShowAuth}
+              className="flex items-center gap-1.5 text-slate-400 hover:text-white text-xs px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 hover:border-white/20 transition-all"
+            >
+              <User size={13} />
+              Sign In / Register
+            </button>
+          )}
+        </div>
       </nav>
 
       {/* Hero */}
@@ -137,7 +134,7 @@ export default function HomePage({ onStart, onShowAuth, onShowPlans }: Props) {
             Build My Plan
             <ArrowRight size={18} />
           </motion.button>
-          {isSupabaseConfigured() && !user && (
+          {!user && (
             <button
               onClick={onShowAuth}
               className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 font-semibold py-4 px-8 rounded-xl transition-all text-base"
@@ -145,7 +142,7 @@ export default function HomePage({ onStart, onShowAuth, onShowPlans }: Props) {
               Create Account
             </button>
           )}
-          {isSupabaseConfigured() && user && (
+          {user && (
             <button
               onClick={onShowPlans}
               className="w-full sm:w-auto bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 font-semibold py-4 px-8 rounded-xl transition-all text-base flex items-center justify-center gap-2"

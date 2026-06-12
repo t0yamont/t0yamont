@@ -184,3 +184,26 @@ export interface SavedPlan {
   wizard_state: WizardState;
   computed: NutritionPlan | null;
 }
+
+export interface PostRaceLogActualItem {
+  product: string;
+  planned: number;
+  actual: number;
+  carbsPerUnit: number;
+  sodiumPerUnit: number;
+  caffeinePerUnit: number;
+}
+
+export interface PostRaceLogEntry {
+  id: string;
+  plan_id: string;
+  user_id: string;
+  actual_splits: {
+    swimMins?: number;
+    bikeMins?: number;
+    runMins?: number;
+  };
+  actual_items: PostRaceLogActualItem[];
+  notes: string;
+  created_at: string;
+}
