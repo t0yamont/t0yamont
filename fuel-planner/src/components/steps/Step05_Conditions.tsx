@@ -121,7 +121,7 @@ export default function Step05_Conditions({ state, onChange, onNext, onBack }: P
   const risk = sweatRisk(state.tempCelsius, state.humidity);
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md mx-auto w-full py-8">
+    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md md:max-w-xl mx-auto w-full py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -140,7 +140,7 @@ export default function Step05_Conditions({ state, onChange, onNext, onBack }: P
         {/* Race confirmation banner */}
         {hasRace && (
           <div className="flex items-center gap-3 bg-cyan-500/8 border border-cyan-400/25 rounded-xl px-4 py-3">
-            <CheckCircle size={16} className="text-cyan-400 flex-shrink-0" />
+            <CheckCircle size={16} className="text-cyan-400 shrink-0" />
             <div className="min-w-0">
               <p className="text-cyan-200 text-sm font-semibold truncate">{race!.name}</p>
               <p className="text-slate-400 text-xs">{race!.city}, {race!.country} · weather auto-loading…</p>

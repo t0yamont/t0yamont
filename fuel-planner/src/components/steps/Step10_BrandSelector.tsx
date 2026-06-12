@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronDown, Check, Zap, Plus, Trash2, FlaskConical, Loader2, TrendingUp, AlertTriangle, Shield, SlidersHorizontal } from 'lucide-react';
 import type { WizardState, FuelBrand, FuelKit, Product, ProductType } from '../../types';
 import { BRAND_INFO, getAllProductsFlat, kitFromBrand, getProductById } from '../../data/brands';
+import BrandLogo from '../BrandLogo';
 import { useAuth } from '../../auth/AuthProvider';
 import { isSupabaseConfigured } from '../../lib/supabase';
 import {
@@ -79,7 +80,7 @@ function ProductPicker({
         {!meta.required && value && (
           <button
             onClick={() => onChange(null)}
-            className="text-slate-600 hover:text-slate-400 text-xs transition-colors flex-shrink-0 ml-2 mt-0.5"
+            className="text-slate-600 hover:text-slate-400 text-xs transition-colors shrink-0 ml-2 mt-0.5"
           >
             Remove
           </button>
@@ -96,14 +97,9 @@ function ProductPicker({
       >
         {selected ? (
           <div className="flex items-center gap-3 min-w-0">
-            <span
-              className="text-xs px-2 py-0.5 rounded font-medium flex-shrink-0"
-              style={{ color: selected.brandColor, background: `${selected.brandColor}18` }}
-            >
-              {selected.brandLabel}
-            </span>
+            <BrandLogo brand={selected.brandId} size={22} />
             <span className="text-white text-sm truncate">{selected.name}</span>
-            <span className="text-slate-500 text-xs flex-shrink-0 font-mono">
+            <span className="text-slate-500 text-xs shrink-0 font-mono">
               {selected.carbsG > 0 && `${selected.carbsG}g carb`}
               {selected.caffeinated && selected.caffeineMg > 0 && ` · ${selected.caffeineMg}mg caf`}
             </span>
@@ -115,7 +111,7 @@ function ProductPicker({
         )}
         <ChevronDown
           size={15}
-          className="text-slate-500 flex-shrink-0 ml-2 transition-transform"
+          className="text-slate-500 shrink-0 ml-2 transition-transform"
           style={{ transform: open ? 'rotate(180deg)' : 'rotate(0deg)' }}
         />
       </button>
@@ -150,12 +146,7 @@ function ProductPicker({
                 >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <span
-                        className="text-xs px-1.5 py-0.5 rounded font-medium flex-shrink-0"
-                        style={{ color: p.brandColor, background: `${p.brandColor}18` }}
-                      >
-                        {p.brandLabel}
-                      </span>
+                      <BrandLogo brand={p.brandId} size={18} />
                       <span className="text-white text-sm truncate">{p.name}</span>
                     </div>
                     <div className="flex gap-3 text-xs font-mono">
@@ -167,7 +158,7 @@ function ProductPicker({
                       {p.mixedCarb && <span className="text-emerald-400/60">mixed-carb</span>}
                     </div>
                   </div>
-                  {p.id === value && <Check size={14} className="text-cyan-400 flex-shrink-0 mt-1" />}
+                  {p.id === value && <Check size={14} className="text-cyan-400 shrink-0 mt-1" />}
                 </button>
               ))}
             </div>
@@ -238,7 +229,7 @@ function CustomProductManager({
                   {p.mixedCarb && ' · mixed-carb'}
                 </p>
               </div>
-              <button onClick={() => onRemove(p.id)} className="text-slate-600 hover:text-red-400 transition-colors flex-shrink-0">
+              <button onClick={() => onRemove(p.id)} className="text-slate-600 hover:text-red-400 transition-colors shrink-0">
                 <Trash2 size={14} />
               </button>
             </div>
@@ -383,7 +374,7 @@ export default function Step10_BrandSelector({ state, onChange, onNext, onBack }
   const canProceed = Boolean(kit.primaryGelId);
 
   return (
-    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md mx-auto w-full py-8">
+    <div className="flex flex-col items-center min-h-[calc(100vh-3rem)] px-4 max-w-md md:max-w-2xl mx-auto w-full py-8">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -412,13 +403,14 @@ export default function Step10_BrandSelector({ state, onChange, onNext, onBack }
                 <button
                   key={b}
                   onClick={() => quickFill(b)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
                     active
                       ? 'text-white'
                       : 'bg-white/5 border-white/10 text-slate-400 hover:border-white/20'
                   }`}
                   style={active ? { background: `${info.color}20`, borderColor: `${info.color}60`, color: info.color } : {}}
                 >
+                  <BrandLogo brand={b} size={15} />
                   {info.label}
                 </button>
               );
@@ -468,7 +460,7 @@ export default function Step10_BrandSelector({ state, onChange, onNext, onBack }
             animate={{ opacity: 1, y: 0 }}
             className="flex items-start gap-2 bg-amber-500/8 border border-amber-400/25 rounded-xl p-4"
           >
-            <Shield size={14} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <Shield size={14} className="text-amber-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-amber-200 text-sm font-semibold">{sponsorRace.name}</p>
               <p className="text-amber-200/80 text-xs leading-relaxed mt-0.5">
@@ -515,15 +507,15 @@ export default function Step10_BrandSelector({ state, onChange, onNext, onBack }
               onClick={() => onChange({ highCarbAdvanced: !highCarbOn })}
               className="w-full flex items-center gap-3 text-left"
             >
-              <TrendingUp size={16} className="text-amber-400 flex-shrink-0" />
+              <TrendingUp size={16} className="text-amber-400 shrink-0" />
               <span className="flex-1 text-white text-sm font-semibold">Advanced high-carb (120–150 g/h)</span>
-              <span className={`relative w-11 h-6 rounded-full transition-colors flex-shrink-0 ${highCarbOn ? 'bg-amber-500' : 'bg-white/15'}`}>
+              <span className={`relative w-11 h-6 rounded-full transition-colors shrink-0 ${highCarbOn ? 'bg-amber-500' : 'bg-white/15'}`}>
                 <span className={`absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all ${highCarbOn ? 'left-[1.375rem]' : 'left-0.5'}`} />
               </span>
             </button>
             {highCarbOn && (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start gap-2">
-                <AlertTriangle size={13} className="text-amber-400 flex-shrink-0 mt-0.5" />
+                <AlertTriangle size={13} className="text-amber-400 shrink-0 mt-0.5" />
                 <p className="text-amber-200 text-xs leading-relaxed">
                   120–150 g/h is an advanced, gut-trained strategy. Build up in training over weeks;
                   not recommended for your first race at this intake.
@@ -540,7 +532,7 @@ export default function Step10_BrandSelector({ state, onChange, onNext, onBack }
             animate={{ opacity: 1 }}
             className="flex items-start gap-2 bg-purple-500/10 border border-purple-400/20 rounded-xl p-3"
           >
-            <Zap size={13} className="text-purple-400 flex-shrink-0 mt-0.5" />
+            <Zap size={13} className="text-purple-400 shrink-0 mt-0.5" />
             <p className="text-purple-200 text-xs leading-relaxed">
               Caffeine gel will be placed at T1 exit (race &gt; 3h) and in the final third of your last leg.
               Timings shown on the Schedule tab.

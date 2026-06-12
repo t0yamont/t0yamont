@@ -38,7 +38,7 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
   const effectiveStyle = styleOverride ?? planStyle;
 
   return (
-    <div className="flex flex-col min-h-screen max-w-md mx-auto w-full">
+    <div className="flex flex-col min-h-screen max-w-md md:max-w-2xl lg:max-w-3xl mx-auto w-full">
       {/* Header */}
       <div className="px-4 pt-8 pb-4 space-y-3 no-print">
         <div className="flex items-center justify-between">
@@ -62,9 +62,9 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
         {/* Race badge */}
         {selectedRace && (
           <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-            <MapPin size={13} className="text-cyan-400 flex-shrink-0" />
+            <MapPin size={13} className="text-cyan-400 shrink-0" />
             <span className="text-slate-300 text-xs font-semibold truncate">{selectedRace.name}</span>
-            <span className="text-slate-500 text-xs ml-auto flex-shrink-0">{selectedRace.city}</span>
+            <span className="text-slate-500 text-xs ml-auto shrink-0">{selectedRace.city}</span>
           </div>
         )}
 
@@ -91,7 +91,7 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-start gap-2 bg-amber-500/10 border border-amber-400/30 rounded-xl p-3"
           >
-            <AlertTriangle size={15} className="text-amber-400 flex-shrink-0 mt-0.5" />
+            <AlertTriangle size={15} className="text-amber-400 shrink-0 mt-0.5" />
             <p className="text-amber-200 text-xs leading-relaxed">
               <strong>Hot race conditions detected.</strong> Fluid and sodium targets have been increased.
               Prioritise drinking at every aid station on the run.
@@ -105,7 +105,7 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
             animate={{ opacity: 1, y: 0 }}
             className="flex items-start gap-2 bg-orange-500/10 border border-orange-400/30 rounded-xl p-3"
           >
-            <Info size={15} className="text-orange-400 flex-shrink-0 mt-0.5" />
+            <Info size={15} className="text-orange-400 shrink-0 mt-0.5" />
             <p className="text-orange-200 text-xs leading-relaxed">
               <strong>GI risk:</strong> Your carb target is ambitious given your gut sensitivity.
               Gels are spaced further apart. Practice this plan in training first.
@@ -116,14 +116,14 @@ export default function ResultsShell({ state, plan, onReset }: Props) {
 
       {/* Sticky tabs */}
       <div className="sticky top-0 z-20 bg-[#0a0f1a]/90 backdrop-blur border-b border-white/5 no-print">
-        <div className="flex overflow-x-auto px-4 scrollbar-none">
+        <div className="flex overflow-x-auto px-4 scrollbar-none md:justify-center">
           {TABS.map(tab => {
             const Icon = tab.icon;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex items-center gap-1.5 px-3 py-3.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-all flex-shrink-0 ${
+                className={`flex items-center gap-1.5 px-3 py-3.5 text-xs font-semibold whitespace-nowrap border-b-2 transition-all shrink-0 ${
                   activeTab === tab.id
                     ? 'border-cyan-400 text-cyan-400'
                     : 'border-transparent text-slate-500 hover:text-slate-300'

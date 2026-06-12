@@ -69,16 +69,48 @@ export default function WizardShell({ state, onChange, onComplete, onHome }: Pro
   return (
     <div className="flex flex-col min-h-screen">
       {/* Progress bar */}
-      <div className="fixed top-0 left-0 right-0 z-30 h-0.5 bg-white/5">
+      <div className="fixed top-0 left-0 right-0 z-30 h-1 bg-white/5">
         <div
-          className="h-full bg-cyan-400 transition-all duration-500"
-          style={{ width: `${progress}%`, boxShadow: '0 0 8px #00d4ff' }}
+          className="h-full transition-all duration-500 rounded-r-full"
+          style={{
+            width: `${progress}%`,
+            background: 'linear-gradient(90deg, #00d4ff, #10b981)',
+            boxShadow: '0 0 10px rgba(0, 212, 255, 0.6)',
+          }}
         />
       </div>
 
       {/* Step counter */}
       <div className="fixed top-4 right-4 z-30">
         <span className="text-slate-500 text-xs font-mono">{step + 1}/{totalSteps}</span>
+      </div>
+
+      {/* Desktop step breadcrumb — clickable for completed steps */}
+      <div className="fixed top-3 left-1/2 -translate-x-1/2 z-30 hidden lg:flex items-center gap-1">
+        {STEP_LABELS.map((label, i) => (
+          <button
+            key={label}
+            onClick={() => { if (i < step) { setDirection('back'); setStep(i); } }}
+            disabled={i >= step}
+            className={`group flex items-center gap-1 px-1.5 py-1 transition-colors ${
+              i < step ? 'cursor-pointer' : 'cursor-default'
+            }`}
+            title={i < step ? `Back to ${label}` : label}
+          >
+            <span
+              className={`w-1.5 h-1.5 rounded-full transition-all ${
+                i === step
+                  ? 'bg-cyan-400 scale-125 shadow-[0_0_6px_#00d4ff]'
+                  : i < step
+                  ? 'bg-cyan-400/50 group-hover:bg-cyan-400'
+                  : 'bg-white/15'
+              }`}
+            />
+            {i === step && (
+              <span className="text-cyan-400 text-xs uppercase tracking-widest font-semibold">{label}</span>
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Home + step name */}
@@ -89,8 +121,8 @@ export default function WizardShell({ state, onChange, onComplete, onHome }: Pro
         >
           ← Home
         </button>
-        <span className="text-slate-700 text-xs">·</span>
-        <span className="text-slate-500 text-xs uppercase tracking-widest">{STEP_LABELS[step]}</span>
+        <span className="text-slate-700 text-xs lg:hidden">·</span>
+        <span className="text-slate-500 text-xs uppercase tracking-widest lg:hidden">{STEP_LABELS[step]}</span>
       </div>
 
       <div className="flex-1 overflow-hidden pt-12">
